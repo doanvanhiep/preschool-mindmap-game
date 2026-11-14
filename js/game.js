@@ -246,7 +246,7 @@
   }
   function renderSelection() {
     const group = data.groupForSlot(state.activeSlot);
-    $('selection-title').textContent = group.title;
+    $('selection-title').textContent = group.selectionTitle || group.title;
     $('selection-instruction').textContent = group.question;
     $('selection-dialog').dataset.theme = group.id;
     $('selection-feedback').textContent = '';
