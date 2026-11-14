@@ -26,7 +26,7 @@ test('configuration defines seven slots, twelve unique local images, and the req
   for (const group of data.groups) {
     assert.equal(group.options.length, 3);
     assert.equal(group.options.filter(option => option.isCorrect).length, group.slots.length);
-    for (const image of group.options) assert.ok(fs.existsSync(path.join(root, image.src)), image.src);
+    for (const image of group.options) assert.ok(fs.existsSync(path.join(root, image.src.split('?')[0])), image.src);
   }
 });
 test('initial state is valid and every empty slot is freely selectable', () => {
@@ -50,7 +50,7 @@ test('the supplied picture set and branch labels match the requested correct and
   };
   for (const group of data.groups) {
     assert.deepEqual(Object.fromEntries(group.options.map(option => [option.id, option.isCorrect])), expected[group.id]);
-    for (const option of group.options) assert.equal(path.extname(option.src), ['tt1s', 'tt2s'].includes(option.id) ? '.png' : '.jpg');
+    for (const option of group.options) assert.equal(path.extname(option.src.split('?')[0]), ['tt1s', 'tt2s'].includes(option.id) ? '.png' : '.jpg');
   }
 });
 for (const group of data.groups) {
