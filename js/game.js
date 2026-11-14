@@ -36,7 +36,7 @@
   document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
   const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
-    const audio = new Audio(`assets/sounds/${name}.mp3?v=rewards-2`);
+    const audio = new Audio(`assets/sounds/${name}.mp3?v=fireworks-only-1`);
     audio.volume = name === 'wrong' ? 0.2 : 0.28;
     audio.preload = 'auto';
     return [name, audio];
@@ -47,7 +47,6 @@
   function playSound(name) {
     stopSounds();
     try {
-      if (name !== 'wrong' && reducedMotion.matches) sounds[name].currentTime = 1.4;
       const playback = sounds[name].play(); if (playback) playback.catch(() => {});
     } catch { /* Audio is optional; the game continues. */ }
   }

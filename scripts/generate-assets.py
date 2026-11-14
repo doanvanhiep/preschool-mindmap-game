@@ -89,18 +89,11 @@ def generate_audio():
     target.mkdir(parents=True, exist_ok=True)
     rng = random.Random(14011)
 
-    def firework(duration, launches):
+    def firework(duration, bursts):
         samples = [0.0] * int(duration * sample_rate)
-        for launch in launches:
-            # A soft rising whistle, followed by a low pop and falling sparkles.
-            for i in range(int(1.35 * sample_rate)):
-                t = i / sample_rate
-                index = int(launch * sample_rate) + i
-                if index >= len(samples):
-                    break
-                envelope = math.sin(math.pi * t / 1.35) ** 2
-                samples[index] += .04 * envelope * math.sin(2 * math.pi * (600 * t + 600 * t * t))
-            start = int((launch + 1.5) * sample_rate)
+        for burst in bursts:
+            # Only the gentle pop and falling sparkles, without a launch whistle.
+            start = int(burst * sample_rate)
             low = 0.0
             for i in range(int(.7 * sample_rate)):
                 index = start + i
@@ -132,7 +125,7 @@ def generate_audio():
             samples.extend([0.0] * int(.09 * sample_rate))
         return samples
 
-    tracks = {'correct': firework(5.2, [0, .55, 1.1, 1.7, 2.3, 3.0]), 'wrong': sad_notes(), 'complete': firework(6.4, [0, .6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2])}
+    tracks = {'correct': firework(5.2, [0, .75, 1.5, 2.3, 3.1, 4.3]), 'wrong': sad_notes(), 'complete': firework(6.4, [0, .8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.5])}
     for name, samples in tracks.items():
         pcm = bytearray()
         gain = min(2.4, .5 / max(max(abs(sample) for sample in samples), .001))

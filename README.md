@@ -27,7 +27,7 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 - Hai ô của mỗi nhánh có khung riêng, cách nhau và lệch vị trí; không còn nền bao chung hai ô. Sơ đồ chỉ giữ tiêu đề chính và hướng dẫn cần thiết.
 - Chọn sai không mất tiến độ hoặc loại đáp án. Chọn đúng sẽ điền tranh và khóa ô.
 - Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa ở nhiều vùng trên toàn màn hình. Chọn sai phát giai điệu buồn nhẹ.
-- Âm thanh dịu hơn, dài gấp đôi bản hiệu ứng đầu tiên: khoảng 5,2 giây khi đúng, 2,1 giây khi sai và 6,4 giây khi hoàn thành. Hiệu ứng mới thay thế hiệu ứng cũ nếu bé tiếp tục chọn đúng, tránh chồng nhiều màn pháo hoa.
+- Âm thanh đúng/hoàn thành chỉ có tiếng pháo hoa nhẹ và tiếng lách tách, không có tiếng rít mở đầu: khoảng 5,2 giây khi đúng, 2,1 giây khi sai và 6,4 giây khi hoàn thành. Hiệu ứng mới thay thế hiệu ứng cũ nếu bé tiếp tục chọn đúng, tránh chồng nhiều màn pháo hoa.
 - Đáp án được lưu trước hiệu ứng; trong lúc ảnh bay, thao tác chọn tiếp và chơi lại tạm khóa. Tải lại trang giữa hiệu ứng vẫn giữ ảnh đúng, không tự phát lại hiệu ứng hoặc âm thanh.
 - Tải lại trang để tiếp tục, kể cả khi đang mở hộp chọn tranh.
 - Hoàn thành 7 ô để nhận lời chúc mừng. Đóng lời chúc mừng để xem sơ đồ; dùng nút trái tim ở đầu trang để chơi lại.
