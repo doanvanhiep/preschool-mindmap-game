@@ -36,7 +36,7 @@
   document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
   const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
-    const audio = new Audio(`assets/sounds/${name}.mp3`);
+    const audio = new Audio(`assets/sounds/${name}.mp3?v=rewards-1`);
     audio.volume = name === 'wrong' ? 0.35 : 0.45;
     audio.preload = 'auto';
     return [name, audio];
