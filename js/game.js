@@ -29,16 +29,125 @@
   let state = loaded.state;
   let busy = false;
   let returnFocus = null;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const effectLayer = document.createElement('div');
+  effectLayer.className = 'effect-layer';
+  effectLayer.setAttribute('aria-hidden', 'true');
+  document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
   const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
     const audio = new Audio(`assets/sounds/${name}.mp3`);
-    audio.volume = name === 'wrong' ? 0.2 : 0.3;
+    audio.volume = name === 'wrong' ? 0.35 : 0.45;
     audio.preload = 'auto';
     return [name, audio];
   }));
+  function stopSounds() {
+    Object.values(sounds).forEach(sound => { try { sound.pause(); sound.currentTime = 0; } catch { /* Some browsers may not have loaded the audio yet. */ } });
+  }
   function playSound(name) {
-    Object.values(sounds).forEach(sound => { sound.pause(); sound.currentTime = 0; });
-    try { const playback = sounds[name].play(); if (playback) playback.catch(() => {}); } catch { /* Audio is optional; the game continues. */ }
+    stopSounds();
+    try {
+      if (name !== 'wrong' && reducedMotion.matches) sounds[name].currentTime = 1.4;
+      const playback = sounds[name].play(); if (playback) playback.catch(() => {});
+    } catch { /* Audio is optional; the game continues. */ }
+  }
+
+  function fittedImageRect(image, fallback = image) {
+    const rect = image.getBoundingClientRect();
+    const width = image.naturalWidth || fallback.naturalWidth;
+    const height = image.naturalHeight || fallback.naturalHeight;
+    if (!width || !height) return rect;
+    const scale = Math.min(rect.width / width, rect.height / height);
+    return { left: rect.left + (rect.width - width * scale) / 2, top: rect.top + (rect.height - height * scale) / 2, width: width * scale, height: height * scale };
+  }
+
+  async function waitForAnimation(animation, duration) {
+    let deadline;
+    try {
+      await Promise.race([
+        animation.finished.catch(() => {}),
+        new Promise(resolve => {
+          deadline = setTimeout(() => {
+            try { animation.finish(); } catch { animation.cancel(); }
+            resolve();
+          }, duration + 300);
+        })
+      ]);
+    } finally { clearTimeout(deadline); }
+  }
+
+  async function flyImage(sourceImage, sourceRect, target) {
+    const image = target.querySelector('img');
+    if (reducedMotion.matches || !image.animate) return;
+    // Keep the saved answer, but reveal its image only when the flying copy arrives.
+    target.classList.add('is-arriving');
+    const flying = document.createElement('img');
+    flying.src = sourceImage.currentSrc || sourceImage.src;
+    flying.alt = '';
+    flying.className = 'flying-image';
+    Object.assign(flying.style, { left: `${sourceRect.left}px`, top: `${sourceRect.top}px`, width: `${sourceRect.width}px`, height: `${sourceRect.height}px` });
+    effectLayer.append(flying);
+    let flight;
+    const finishFlight = () => { try { if (flight && flight.playState !== 'finished') flight.finish(); } catch { /* A cancelled animation needs no further work. */ } };
+    try {
+      const rect = target.getBoundingClientRect();
+      if (rect.top < 0 || rect.bottom > innerHeight) target.scrollIntoView({ block: 'center', behavior: 'instant' });
+      const destination = fittedImageRect(image, sourceImage);
+      const dx = destination.left - sourceRect.left;
+      const dy = destination.top - sourceRect.top;
+      const sx = destination.width / sourceRect.width;
+      const sy = destination.height / sourceRect.height;
+      flight = flying.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { offset: 0.45, transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 45}px) scale(${1 + (sx - 1) * 0.4}, ${1 + (sy - 1) * 0.4})`, opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, opacity: 1 }
+      ], { duration: 1350, easing: 'cubic-bezier(.35,0,.2,1)', fill: 'forwards' });
+      window.addEventListener('resize', finishFlight, { once: true });
+      const onVisibility = () => { if (document.hidden) finishFlight(); };
+      document.addEventListener('visibilitychange', onVisibility);
+      try { await waitForAnimation(flight, 1350); } catch { /* Reload, resize and cancelled effects never change the saved answer. */ }
+      finally { document.removeEventListener('visibilitychange', onVisibility); }
+      target.classList.remove('is-arriving');
+      await waitForAnimation(image.animate([{ opacity: 0.5, transform: 'scale(.96)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 220, easing: 'ease-out' }), 220);
+    } finally {
+      window.removeEventListener('resize', finishFlight);
+      flying.remove();
+      target.classList.remove('is-arriving');
+    }
+  }
+
+  function celebrate(target, completed) {
+    target.classList.add('is-celebrating');
+    setTimeout(() => target.classList.remove('is-celebrating'), 1400);
+    if (reducedMotion.matches || typeof target.animate !== 'function') return;
+    const rect = target.getBoundingClientRect();
+    const centerX = Math.max(35, Math.min(innerWidth - 35, rect.left + rect.width / 2));
+    const centerY = Math.max(60, Math.min(innerHeight - 90, rect.top + rect.height * 0.3));
+    const colors = ['#e7ad32', '#e58aa6', '#74a8ce', '#8bae70', '#c39de1'];
+    const count = completed ? 32 : 24;
+    [-1, 0, 1].forEach((burst, burstIndex) => {
+      const x = Math.max(20, Math.min(innerWidth - 20, centerX + burst * Math.min(110, innerWidth / 5)));
+      const y = Math.max(45, centerY - (burst === 0 ? 35 : -15));
+      for (let i = 0; i < count; i += 1) {
+        const angle = (i / count) * Math.PI * 2;
+        const radius = 45 + Math.random() * (completed ? 90 : 65);
+        const dx = Math.cos(angle) * radius;
+        const dy = Math.sin(angle) * radius;
+        const particle = document.createElement('i');
+        particle.className = 'firework-particle';
+        Object.assign(particle.style, { left: `${x}px`, top: `${y}px`, background: colors[i % colors.length], color: colors[i % colors.length] });
+        effectLayer.append(particle);
+        const duration = 1000 + Math.random() * 450;
+        const delay = burstIndex * 130;
+        const animation = particle.animate([
+          { transform: 'translate(0,0) scale(.2)', opacity: 0 },
+          { offset: 0.08, opacity: 1 },
+          { offset: 0.6, transform: `translate(${dx * 0.8}px,${dy * 0.8 + 12}px) scale(1)`, opacity: 0.9 },
+          { transform: `translate(${dx}px,${dy + 75}px) scale(.1)`, opacity: 0 }
+        ], { duration, delay, easing: 'cubic-bezier(.12,.65,.35,1)', fill: 'both' });
+        waitForAnimation(animation, duration + delay).finally(() => particle.remove());
+      }
+    });
   }
   function persist() { if (!store.save(state)) $('storage-notice').hidden = false; }
   if (!loaded.available) $('storage-notice').hidden = false;
@@ -56,9 +165,8 @@
       const option = group.options.find(item => item.id === slot.imageId);
       const img = document.createElement('img');
       img.src = option.src; img.alt = option.description;
-      const label = document.createElement('span'); label.className = 'slot-caption'; label.textContent = option.description;
       const check = document.createElement('span'); check.className = 'slot-check'; check.textContent = '✓'; check.setAttribute('aria-hidden', 'true');
-      button.append(img, label, check);
+      button.append(img, check);
       button.setAttribute('aria-label', `${group.title}, ô ${slotNumber}: ${option.description}, đã hoàn thành`);
     } else {
       const plus = document.createElement('span'); plus.className = 'slot-plus'; plus.textContent = '+'; plus.setAttribute('aria-hidden', 'true');
@@ -73,69 +181,59 @@
     $('branches').replaceChildren(...data.branches.map(branch => {
       const section = document.createElement('section'); section.className = `branch branch-${branch.id}`; section.dataset.branch = branch.id;
       const heading = document.createElement('div'); heading.className = 'branch-heading';
-      const icon = document.createElement('span'); icon.className = 'branch-icon'; icon.textContent = branch.icon; icon.setAttribute('aria-hidden', 'true');
-      const titles = document.createElement('div');
-      const subtitle = document.createElement('p'); subtitle.textContent = branch.shortTitle;
       const title = document.createElement('h2'); title.textContent = branch.title; title.id = `title-${branch.id}`;
       section.setAttribute('aria-labelledby', title.id);
-      const number = document.createElement('span'); number.className = 'branch-number'; number.textContent = branch.number; number.setAttribute('aria-hidden', 'true');
-      titles.append(subtitle, title); heading.append(icon, titles, number);
+      heading.append(title);
       const slots = document.createElement('div'); slots.className = 'branch-slots'; slots.append(...branch.slots.map(createSlot));
-      const connectors = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      connectors.classList.add('branch-connectors');
-      connectors.setAttribute('aria-hidden', 'true');
-      const defs = document.createElementNS(connectors.namespaceURI, 'defs');
-      const marker = document.createElementNS(connectors.namespaceURI, 'marker');
-      marker.id = `arrow-${branch.id}`;
-      Object.entries({ viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto', markerUnits: 'userSpaceOnUse' }).forEach(([name, value]) => marker.setAttribute(name, value));
-      const tip = document.createElementNS(connectors.namespaceURI, 'path');
-      tip.setAttribute('d', 'M 1 1 L 9 5 L 1 9'); tip.classList.add('arrow-tip');
-      marker.append(tip); defs.append(marker); connectors.append(defs);
-      branch.slots.forEach(slotId => {
-        const path = document.createElementNS(connectors.namespaceURI, 'path');
-        path.dataset.targetSlot = slotId;
-        path.setAttribute('marker-end', `url(#arrow-${branch.id})`);
-        connectors.append(path);
-      });
-      section.append(connectors, heading, slots); return section;
+      section.append(heading, slots); return section;
     }));
-    $('progress-text').replaceChildren(document.createTextNode('Bé đã khám phá '));
+    $('progress-text').replaceChildren();
     const strong = document.createElement('strong'); strong.textContent = `${state.progress}/7`;
-    $('progress-text').append(strong, document.createTextNode(' bức tranh'));
+    $('progress-text').append(strong);
+    $('progress-text').setAttribute('aria-label', `Đã hoàn thành ${state.progress} trên 7 bức tranh`);
     $('progress-dots').replaceChildren(...data.slotIds.map((id, index) => { const dot = document.createElement('span'); dot.className = index < state.progress ? 'filled' : ''; return dot; }));
     requestAnimationFrame(drawConnections);
   }
   function drawConnections() {
     const board = $('mindmap').getBoundingClientRect();
-    const central = $('central-node').getBoundingClientRect();
+    const central = document.querySelector('[data-slot="central"]').getBoundingClientRect();
     const mobile = matchMedia('(max-width: 700px)').matches;
     const x1 = central.left - board.left + central.width / 2;
     const y1 = central.top - board.top + central.height / 2;
     $('connections').setAttribute('viewBox', `0 0 ${board.width} ${board.height}`);
+    const svg = $('connections');
+    svg.replaceChildren();
+    const ns = svg.namespaceURI;
+    const makePath = (d, color, targetSlot = null) => {
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', d); path.style.stroke = color;
+      if (targetSlot) path.dataset.targetSlot = targetSlot;
+      svg.append(path); return path;
+    };
     data.branches.forEach(branch => {
       const section = document.querySelector(`.branch-${branch.id}`);
-      const rect = section.getBoundingClientRect();
       const heading = section.querySelector('.branch-heading').getBoundingClientRect();
-      let x2, y2, path;
-      if (mobile) {
-        x2 = 16; y2 = heading.top - board.top + heading.height / 2;
-        path = `M ${x1} ${y1} H ${x2} V ${y2} H ${rect.left - board.left + 10}`;
-      } else {
-        x2 = rect.left - board.left + rect.width / 2; y2 = heading.top - board.top + heading.height / 2;
-        const bend = (x1 + x2) / 2;
-        path = `M ${x1} ${y1} C ${bend} ${y1}, ${bend} ${y2}, ${x2} ${y2}`;
-      }
-      $('connections').querySelector(`[data-branch="${branch.id}"]`).setAttribute('d', path);
-      const connectors = section.querySelector('.branch-connectors');
-      connectors.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-      const startX = heading.left - rect.left + heading.width / 2;
-      const startY = heading.bottom - rect.top + 3;
+      const color = getComputedStyle(section).getPropertyValue('--accent').trim();
+      const defs = document.createElementNS(ns, 'defs');
+      const marker = document.createElementNS(ns, 'marker');
+      marker.id = `arrow-${branch.id}`;
+      Object.entries({ viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '10', markerHeight: '10', orient: 'auto', markerUnits: 'userSpaceOnUse' }).forEach(([name, value]) => marker.setAttribute(name, value));
+      const tip = document.createElementNS(ns, 'path');
+      tip.setAttribute('d', 'M 1 1 L 9 5 L 1 9'); tip.style.stroke = color;
+      marker.append(tip); defs.append(marker); svg.append(defs);
+      const startX = heading.left - board.left + heading.width / 2;
+      const startY = heading.bottom - board.top + 10;
+      // One labelled stem from the center, then two independent arrow destinations.
+      const stem = mobile
+        ? `M ${x1} ${y1} H 12 V ${startY} H ${startX}`
+        : `M ${x1} ${y1} C ${(x1 + startX) / 2} ${y1}, ${(x1 + startX) / 2} ${startY}, ${startX} ${startY}`;
+      makePath(stem, color).dataset.branch = branch.id;
       branch.slots.forEach(slotId => {
         const target = section.querySelector(`[data-slot="${slotId}"]`).getBoundingClientRect();
-        const targetX = target.left - rect.left + target.width / 2;
-        const targetY = target.top - rect.top - 4;
+        const targetX = target.left - board.left + target.width / 2;
+        const targetY = target.top - board.top - 7;
         const middleY = startY + (targetY - startY) / 2;
-        connectors.querySelector(`[data-target-slot="${slotId}"]`).setAttribute('d', `M ${startX} ${startY} C ${startX} ${middleY}, ${targetX} ${middleY}, ${targetX} ${targetY}`);
+        makePath(`M ${startX} ${startY} C ${startX} ${middleY}, ${targetX} ${middleY}, ${targetX} ${targetY}`, color, slotId).setAttribute('marker-end', `url(#arrow-${branch.id})`);
       });
     });
   }
@@ -148,7 +246,7 @@
     $('selection-title').textContent = group.title;
     $('selection-instruction').textContent = group.question;
     $('selection-dialog').dataset.theme = group.id;
-    $('selection-feedback').textContent = 'Bé chạm vào bức tranh mình chọn nhé!';
+    $('selection-feedback').textContent = '';
     $('selection-feedback').classList.remove('is-wrong');
     $('image-options').replaceChildren(...getAvailableOptions(state, state.activeSlot).map(option => {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'option-card'; button.dataset.image = option.id;
@@ -176,7 +274,7 @@
     if (next === state) return;
     state = next; returnFocus = `[data-slot="${button.dataset.slot}"]`; persist(); renderSelection(); showDialog('selection');
   });
-  $('image-options').addEventListener('click', event => {
+  $('image-options').addEventListener('click', async event => {
     const button = event.target.closest('[data-image]');
     if (!button || busy || state.modal !== 'selection') return;
     busy = true;
@@ -184,27 +282,46 @@
       const result = chooseImage(state, button.dataset.image);
       if (!result.changed) {
         playSound('wrong');
-        $('selection-feedback').textContent = 'Chưa phù hợp rồi. Bé thử chọn bức tranh khác nhé!';
+        $('selection-feedback').textContent = 'Chưa đúng rồi, con thử lại nhé!';
         $('selection-feedback').classList.add('is-wrong');
         button.classList.remove('try-again'); void button.offsetWidth; button.classList.add('try-again');
         return;
       }
       const previousSlot = state.activeSlot;
-      state = result.state; persist(); renderBoard(); showDialog(state.modal);
+      const sourceImage = button.querySelector('img');
+      const sourceRect = fittedImageRect(sourceImage);
+      state = result.state;
+      // Persist before starting any effect so a reload during flight is safe.
+      persist(); showDialog(null); renderBoard();
+      $('mindmap').setAttribute('aria-busy', 'true');
+      $('reset-button').disabled = true;
       playSound(state.completed ? 'complete' : 'correct');
+      const target = document.querySelector(`[data-slot="${previousSlot}"]`);
+      try { await flyImage(sourceImage, sourceRect, target); } catch { target.classList.remove('is-arriving'); }
+      celebrate(target, state.completed);
       $('game-status').textContent = `Đúng rồi! Bé đã khám phá ${state.progress} trên 7 bức tranh.`;
+      if (state.completed) {
+        if (!reducedMotion.matches) await new Promise(resolve => setTimeout(resolve, 600));
+        showDialog('completion');
+      }
       if (!state.completed) {
         const group = data.groupForSlot(previousSlot);
         const nextId = [...group.slots, ...data.slotIds].find(id => !state.slots[id].completed);
-        if (nextId) document.querySelector(`[data-slot="${nextId}"]`).focus();
+        if (nextId) document.querySelector(`[data-slot="${nextId}"]`).focus({ preventScroll: event.detail !== 0 });
       }
       returnFocus = state.completed ? '#reset-button' : null;
-    } finally { busy = false; }
+    } finally {
+      busy = false;
+      $('mindmap').removeAttribute('aria-busy');
+      $('reset-button').disabled = false;
+    }
   });
-  $('reset-button').addEventListener('click', () => { returnFocus = '#reset-button'; showDialog('reset'); });
+  $('reset-button').addEventListener('click', () => { if (busy) return; returnFocus = '#reset-button'; showDialog('reset'); });
   $('cancel-reset').addEventListener('click', () => dismissDialog('reset'));
   $('confirm-reset').addEventListener('click', () => {
-    state = storage.createInitialState(); Object.values(sounds).forEach(sound => { sound.pause(); sound.currentTime = 0; });
+    state = storage.createInitialState(); stopSounds();
+    effectLayer.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+    effectLayer.replaceChildren();
     persist(); renderBoard(); showDialog(null); returnFocus = null; $('reset-button').focus();
     $('game-status').textContent = 'Trò chơi đã bắt đầu lại. Bé cùng chọn tranh nhé!';
   });

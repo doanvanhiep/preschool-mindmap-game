@@ -24,10 +24,13 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 - Ô trung tâm có 3 tranh, một tranh đúng.
 - Mỗi nhánh có 3 tranh, hai tranh đúng. Ô nào được điền trước cũng có 3 lựa chọn; ô còn lại có 2 lựa chọn. Tranh đúng đã dùng không được chọn lại.
 - Từ trung tâm nối đến 3 nhánh; mỗi nhánh tách thành 2 mũi tên hướng vào 2 ô tranh, tổng cộng 6 đầu mũi tên.
+- Hai ô của mỗi nhánh có khung riêng, cách nhau và lệch vị trí; không còn nền bao chung hai ô. Sơ đồ chỉ giữ tiêu đề chính và hướng dẫn cần thiết.
 - Chọn sai không mất tiến độ hoặc loại đáp án. Chọn đúng sẽ điền tranh và khóa ô.
+- Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa và âm thanh ăn mừng. Chọn sai phát giai điệu buồn nhẹ.
+- Đáp án được lưu trước hiệu ứng; trong lúc ảnh bay, thao tác chọn tiếp và chơi lại tạm khóa. Tải lại trang giữa hiệu ứng vẫn giữ ảnh đúng, không tự phát lại hiệu ứng hoặc âm thanh.
 - Tải lại trang để tiếp tục, kể cả khi đang mở hộp chọn tranh.
 - Hoàn thành 7 ô để nhận lời chúc mừng. Đóng lời chúc mừng để xem sơ đồ; dùng nút trái tim ở đầu trang để chơi lại.
-- Các hộp thoại dùng được bằng bàn phím, hỗ trợ Escape, giữ focus và trả focus khi đóng. Hiệu ứng tôn trọng cài đặt giảm chuyển động của thiết bị.
+- Các hộp thoại dùng được bằng bàn phím, hỗ trợ Escape, giữ focus và trả focus khi đóng. Khi bật giảm chuyển động, ảnh điền ngay với viền sáng tĩnh, không có ảnh bay hoặc hạt pháo hoa.
 
 ## Cấu trúc
 
@@ -86,6 +89,9 @@ Kiểm tra thực tế trên trình duyệt: âm thanh đúng/sai/hoàn thành, 
 
 - 43/43 kiểm thử Node đạt; bao gồm ánh xạ đáp án của bộ ảnh người dùng và loại bỏ tiến độ của bộ tranh cũ. Ba tệp JavaScript qua kiểm tra cú pháp.
 - Bộ ảnh mới: 12/12 tệp trùng khớp từng byte với bản gốc. Sáu mũi tên trỏ đúng vào hai ô của mỗi nhánh; chơi đủ bảy ảnh và reload hộp chọn ảnh thành công.
+- Hiệu ứng mới: ảnh còn đang bay ở mốc 0,5 giây; cả 7 lượt đúng có pháo hoa sau khi ảnh tới ô, không ghi trùng đáp án khi nhấp lặp; thông báo hoàn thành đợi ảnh cuối cùng hạ xuống.
+- Reload giữa lúc ảnh bay giữ đáp án và không phát lại hiệu ứng. Giả lập trình duyệt dừng hoạt ảnh: trò chơi tự hoàn tất điền ảnh, mở khóa và dọn hạt pháo hoa; chơi lại cũng hủy mọi hiệu ứng đang còn.
+- Chế độ giảm chuyển động hoàn thành đủ 7 ô mà không tạo ảnh bay hoặc hạt pháo hoa. Không có lỗi console trong luồng hoàn thành thông thường.
 - Chrome: hoàn thành toàn bộ 7 ô, chọn sai tại cả bốn nhóm, chọn ô phải trước, chống chọn lặp, reload giữ đúng lựa chọn/hộp thoại, đóng lời chúc mừng không mở lại, hủy/xác nhận chơi lại và Escape trả focus đúng ô.
 - Chrome ở kích thước 1280 px, 768 px và 360 px không tràn ngang; thẻ chọn ảnh mobile lớn hơn 44 px, hộp thoại nằm trong màn hình. Chế độ giảm chuyển động tắt hiệu ứng.
 - Cả ba MP3 tải và giải mã thành công. Mô phỏng từ chối phát âm thanh không tạo lỗi Promise chưa xử lý.

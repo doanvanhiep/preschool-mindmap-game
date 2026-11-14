@@ -1,10 +1,11 @@
 """Create original SVG placeholders; optionally synthesize MP3s with a dev-only lameenc.
 
-Usage: python scripts/generate-assets.py [--audio]
+Usage: python scripts/generate-assets.py [--audio | --audio-only]
 The website does not use Python or any encoder at runtime.
 """
 from pathlib import Path
 import math
+import random
 import struct
 import sys
 
@@ -84,29 +85,70 @@ def generate_images():
 def generate_audio():
     import lameenc  # Optional authoring tool, never imported by the website.
     sample_rate = 44100
-    melodies = {'correct': [(659.25, .15), (880, .25)], 'wrong': [(392, .18), (349.23, .22)], 'complete': [(523.25, .14), (659.25, .14), (783.99, .16), (1046.5, .42)]}
     target = ROOT / 'assets' / 'sounds'
     target.mkdir(parents=True, exist_ok=True)
-    for name, notes in melodies.items():
-        pcm = bytearray()
-        for frequency, duration in notes:
-            count = int(duration * sample_rate)
-            for i in range(count):
+    rng = random.Random(14011)
+
+    def firework(duration, launches):
+        samples = [0.0] * int(duration * sample_rate)
+        for launch in launches:
+            # A soft rising whistle, followed by a low pop and falling sparkles.
+            for i in range(int(1.35 * sample_rate)):
                 t = i / sample_rate
-                envelope = min(1, t / .018) * max(0, 1 - t / duration) ** 1.6
-                wave = math.sin(2 * math.pi * frequency * t) + .13 * math.sin(2 * math.pi * frequency * 2 * t)
-                pcm.extend(struct.pack('<h', round(7500 * envelope * wave)))
-            pcm.extend(bytes(int(sample_rate * .035) * 2))
+                index = int(launch * sample_rate) + i
+                if index >= len(samples):
+                    break
+                envelope = math.sin(math.pi * t / 1.35) ** 2
+                samples[index] += .05 * envelope * math.sin(2 * math.pi * (600 * t + 600 * t * t))
+            start = int((launch + 1.5) * sample_rate)
+            low = 0.0
+            for i in range(int(.7 * sample_rate)):
+                index = start + i
+                if index >= len(samples):
+                    break
+                t = i / sample_rate
+                noise = rng.uniform(-1, 1)
+                low = .85 * low + .15 * noise
+                envelope = math.exp(-8 * t)
+                samples[index] += envelope * (.26 * low + .045 * noise + .13 * math.sin(2 * math.pi * 85 * t) * math.exp(-20 * t))
+            for _ in range(18):
+                sparkle = start + int(rng.uniform(.08, .7) * sample_rate)
+                frequency = rng.uniform(1400, 3200)
+                for i in range(int(.028 * sample_rate)):
+                    if sparkle + i >= len(samples):
+                        break
+                    t = i / sample_rate
+                    samples[sparkle + i] += .035 * math.exp(-150 * t) * math.sin(2 * math.pi * frequency * t)
+        return samples
+
+    def sad_notes():
+        # A descending A-minor phrase, gentle rather than a harsh error buzzer.
+        samples = []
+        for frequency, duration in [(440, .25), (349.23, .28), (261.63, .4)]:
+            for i in range(int(duration * sample_rate)):
+                t = i / sample_rate
+                envelope = min(1, t / .025) * max(0, 1 - t / duration) ** 1.7
+                samples.append(.2 * envelope * (math.sin(2 * math.pi * frequency * t) + .15 * math.sin(2 * math.pi * frequency * 2 * t)))
+            samples.extend([0.0] * int(.045 * sample_rate))
+        return samples
+
+    tracks = {'correct': firework(2.6, [0, .25]), 'wrong': sad_notes(), 'complete': firework(3.2, [0, .2, .45, .7])}
+    for name, samples in tracks.items():
+        pcm = bytearray()
+        gain = min(2.4, .55 / max(max(abs(sample) for sample in samples), .001))
+        for sample in samples:
+            pcm.extend(struct.pack('<h', round(max(-.65, min(.65, sample * gain)) * 32767)))
         encoder = lameenc.Encoder()
         encoder.set_bit_rate(128)
         encoder.set_in_sample_rate(sample_rate)
         encoder.set_channels(1)
         encoder.set_quality(2)
         (target / f'{name}.mp3').write_bytes(encoder.encode(bytes(pcm)) + encoder.flush())
-    print('Created 3 original, soft MP3 sound effects.')
+    print('Created firework celebration and gentle sad MP3 sound effects.')
 
 
 if __name__ == '__main__':
-    generate_images()
-    if '--audio' in sys.argv:
+    if '--audio-only' not in sys.argv:
+        generate_images()
+    if '--audio' in sys.argv or '--audio-only' in sys.argv:
         generate_audio()
