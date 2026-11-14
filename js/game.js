@@ -36,7 +36,7 @@
   document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
   const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
-    const audio = new Audio(`assets/sounds/${name}.mp3?v=fireworks-only-1`);
+    const audio = new Audio(`assets/sounds/${name}.mp3?v=fireworks-short-1`);
     audio.volume = name === 'wrong' ? 0.2 : 0.28;
     audio.preload = 'auto';
     return [name, audio];
@@ -298,10 +298,11 @@
       persist(); showDialog(null); renderBoard();
       $('mindmap').setAttribute('aria-busy', 'true');
       $('reset-button').disabled = true;
-      playSound(state.completed ? 'complete' : 'correct');
+      stopSounds();
       const target = document.querySelector(`[data-slot="${previousSlot}"]`);
       try { await flyImage(sourceImage, sourceRect, target); } catch { target.classList.remove('is-arriving'); }
       celebrate(target, state.completed);
+      playSound(state.completed ? 'complete' : 'correct');
       $('game-status').textContent = `Đúng rồi! Bé đã khám phá ${state.progress} trên 7 bức tranh.`;
       if (state.completed) {
         if (!reducedMotion.matches) await new Promise(resolve => setTimeout(resolve, 600));

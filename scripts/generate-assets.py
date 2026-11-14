@@ -125,7 +125,7 @@ def generate_audio():
             samples.extend([0.0] * int(.09 * sample_rate))
         return samples
 
-    tracks = {'correct': firework(5.2, [0, .75, 1.5, 2.3, 3.1, 4.3]), 'wrong': sad_notes(), 'complete': firework(6.4, [0, .8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.5])}
+    tracks = {'correct': firework(1.8, [0, .45, .9]), 'wrong': sad_notes(), 'complete': firework(1.8, [0, .3, .65, .95])}
     for name, samples in tracks.items():
         pcm = bytearray()
         gain = min(2.4, .5 / max(max(abs(sample) for sample in samples), .001))
