@@ -36,8 +36,8 @@
   document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
   const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
-    const audio = new Audio(`assets/sounds/${name}.mp3?v=rewards-1`);
-    audio.volume = name === 'wrong' ? 0.35 : 0.45;
+    const audio = new Audio(`assets/sounds/${name}.mp3?v=rewards-2`);
+    audio.volume = name === 'wrong' ? 0.2 : 0.28;
     audio.preload = 'auto';
     return [name, audio];
   }));
@@ -118,27 +118,31 @@
 
   function celebrate(target, completed) {
     target.classList.add('is-celebrating');
-    setTimeout(() => target.classList.remove('is-celebrating'), 1400);
+    setTimeout(() => target.classList.remove('is-celebrating'), 2300);
     if (reducedMotion.matches || typeof target.animate !== 'function') return;
-    const rect = target.getBoundingClientRect();
-    const centerX = Math.max(35, Math.min(innerWidth - 35, rect.left + rect.width / 2));
-    const centerY = Math.max(60, Math.min(innerHeight - 90, rect.top + rect.height * 0.3));
+    // Replace the previous show instead of stacking hundreds of delayed bursts.
+    effectLayer.querySelectorAll('.firework-particle').forEach(particle => {
+      particle.getAnimations().forEach(animation => animation.cancel());
+      particle.remove();
+    });
+    const bursts = completed
+      ? [[.12, .2, 0], [.86, .18, 600], [.48, .4, 1200], [.18, .67, 1800], [.83, .7, 2400], [.48, .82, 3000], [.33, .15, 3600], [.67, .55, 4200]]
+      : [[.14, .22, 0], [.84, .2, 550], [.5, .43, 1100], [.18, .7, 1700], [.82, .72, 2300], [.5, .82, 3000]];
     const colors = ['#e7ad32', '#e58aa6', '#74a8ce', '#8bae70', '#c39de1'];
-    const count = completed ? 32 : 24;
-    [-1, 0, 1].forEach((burst, burstIndex) => {
-      const x = Math.max(20, Math.min(innerWidth - 20, centerX + burst * Math.min(110, innerWidth / 5)));
-      const y = Math.max(45, centerY - (burst === 0 ? 35 : -15));
+    const count = completed ? 24 : 20;
+    bursts.forEach(([relativeX, relativeY, delay]) => {
+      const x = relativeX * innerWidth;
+      const y = relativeY * innerHeight;
       for (let i = 0; i < count; i += 1) {
         const angle = (i / count) * Math.PI * 2;
-        const radius = 45 + Math.random() * (completed ? 90 : 65);
+        const radius = 45 + Math.random() * Math.min(150, Math.min(innerWidth, innerHeight) * .2);
         const dx = Math.cos(angle) * radius;
         const dy = Math.sin(angle) * radius;
         const particle = document.createElement('i');
         particle.className = 'firework-particle';
         Object.assign(particle.style, { left: `${x}px`, top: `${y}px`, background: colors[i % colors.length], color: colors[i % colors.length] });
         effectLayer.append(particle);
-        const duration = 1000 + Math.random() * 450;
-        const delay = burstIndex * 130;
+        const duration = 1800 + Math.random() * 600;
         const animation = particle.animate([
           { transform: 'translate(0,0) scale(.2)', opacity: 0 },
           { offset: 0.08, opacity: 1 },

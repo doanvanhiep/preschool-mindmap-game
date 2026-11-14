@@ -26,7 +26,8 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 - Từ trung tâm nối đến 3 nhánh; mỗi nhánh tách thành 2 mũi tên hướng vào 2 ô tranh, tổng cộng 6 đầu mũi tên.
 - Hai ô của mỗi nhánh có khung riêng, cách nhau và lệch vị trí; không còn nền bao chung hai ô. Sơ đồ chỉ giữ tiêu đề chính và hướng dẫn cần thiết.
 - Chọn sai không mất tiến độ hoặc loại đáp án. Chọn đúng sẽ điền tranh và khóa ô.
-- Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa và âm thanh ăn mừng. Chọn sai phát giai điệu buồn nhẹ.
+- Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa ở nhiều vùng trên toàn màn hình. Chọn sai phát giai điệu buồn nhẹ.
+- Âm thanh dịu hơn, dài gấp đôi bản hiệu ứng đầu tiên: khoảng 5,2 giây khi đúng, 2,1 giây khi sai và 6,4 giây khi hoàn thành. Hiệu ứng mới thay thế hiệu ứng cũ nếu bé tiếp tục chọn đúng, tránh chồng nhiều màn pháo hoa.
 - Đáp án được lưu trước hiệu ứng; trong lúc ảnh bay, thao tác chọn tiếp và chơi lại tạm khóa. Tải lại trang giữa hiệu ứng vẫn giữ ảnh đúng, không tự phát lại hiệu ứng hoặc âm thanh.
 - Tải lại trang để tiếp tục, kể cả khi đang mở hộp chọn tranh.
 - Hoàn thành 7 ô để nhận lời chúc mừng. Đóng lời chúc mừng để xem sơ đồ; dùng nút trái tim ở đầu trang để chơi lại.
@@ -62,7 +63,7 @@ Giữ ID ảnh duy nhất, ID ô ổn định, 3 lựa chọn/nhóm, một đáp
 | Nhóm | Đáp án đúng | Đáp án sai |
 |---|---|---|
 | Trung tâm | `ttd.jpg` | `tt1s.png`, `tt2s.png` |
-| Hoạt động của cô | `hdcc1d.jpg`, `hdcc2d.jpg` | `hdccs.jpg` |
+| Cô vui vẻ tươi cười khi vào lớp | `hdcc1d.jpg`, `hdcc2d.jpg` | `hdccs.jpg` |
 | Thái độ của cô | `tdcc1d.jpg`, `tdcc2d.jpg` | `tdccs.jpg` |
 | Tình cảm của bé | `tcct1d.jpg`, `tcct2d.jpg` | `tccts.jpg` |
 
@@ -90,6 +91,7 @@ Kiểm tra thực tế trên trình duyệt: âm thanh đúng/sai/hoàn thành, 
 - 43/43 kiểm thử Node đạt; bao gồm ánh xạ đáp án của bộ ảnh người dùng và loại bỏ tiến độ của bộ tranh cũ. Ba tệp JavaScript qua kiểm tra cú pháp.
 - Bộ ảnh mới: 12/12 tệp trùng khớp từng byte với bản gốc. Sáu mũi tên trỏ đúng vào hai ô của mỗi nhánh; chơi đủ bảy ảnh và reload hộp chọn ảnh thành công.
 - Hiệu ứng mới: ảnh còn đang bay ở mốc 0,5 giây; cả 7 lượt đúng có pháo hoa sau khi ảnh tới ô, không ghi trùng đáp án khi nhấp lặp; thông báo hoàn thành đợi ảnh cuối cùng hạ xuống.
+- Bản pháo hoa toàn màn hình: 6 chùm khi đúng, 8 chùm khi hoàn thành, phân bố cả bốn phía của khung nhìn; âm lượng phát giảm và độ dài ba MP3 tăng gần gấp đôi. Tiêu đề mới của nhánh thứ nhất không chồng lên ảnh ở 360 px và 768 px.
 - Reload giữa lúc ảnh bay giữ đáp án và không phát lại hiệu ứng. Giả lập trình duyệt dừng hoạt ảnh: trò chơi tự hoàn tất điền ảnh, mở khóa và dọn hạt pháo hoa; chơi lại cũng hủy mọi hiệu ứng đang còn.
 - Chế độ giảm chuyển động hoàn thành đủ 7 ô mà không tạo ảnh bay hoặc hạt pháo hoa. Không có lỗi console trong luồng hoàn thành thông thường.
 - Chrome: hoàn thành toàn bộ 7 ô, chọn sai tại cả bốn nhóm, chọn ô phải trước, chống chọn lặp, reload giữ đúng lựa chọn/hộp thoại, đóng lời chúc mừng không mở lại, hủy/xác nhận chơi lại và Escape trả focus đúng ô.

@@ -41,7 +41,7 @@ test('initial state is valid and every empty slot is freely selectable', () => {
 });
 test('the supplied picture set and branch labels match the requested correct and wrong answers', () => {
   assert.equal(data.title, 'Cô giáo của con');
-  assert.deepEqual(clone(data.branches.map(group => group.title)), ['Hoạt động của cô', 'Thái độ của cô', 'Tình cảm của bé']);
+  assert.deepEqual(clone(data.branches.map(group => group.title)), ['Cô vui vẻ tươi cười khi vào lớp', 'Thái độ của cô', 'Tình cảm của bé']);
   const expected = {
     central: { ttd: true, tt1s: false, tt2s: false },
     action: { hdcc1d: true, hdcc2d: true, hdccs: false },

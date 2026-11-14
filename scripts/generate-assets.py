@@ -99,7 +99,7 @@ def generate_audio():
                 if index >= len(samples):
                     break
                 envelope = math.sin(math.pi * t / 1.35) ** 2
-                samples[index] += .05 * envelope * math.sin(2 * math.pi * (600 * t + 600 * t * t))
+                samples[index] += .04 * envelope * math.sin(2 * math.pi * (600 * t + 600 * t * t))
             start = int((launch + 1.5) * sample_rate)
             low = 0.0
             for i in range(int(.7 * sample_rate)):
@@ -109,8 +109,8 @@ def generate_audio():
                 t = i / sample_rate
                 noise = rng.uniform(-1, 1)
                 low = .85 * low + .15 * noise
-                envelope = math.exp(-8 * t)
-                samples[index] += envelope * (.26 * low + .045 * noise + .13 * math.sin(2 * math.pi * 85 * t) * math.exp(-20 * t))
+                envelope = min(1, t / .025) * math.exp(-6 * t)
+                samples[index] += envelope * (.22 * low + .022 * noise + .1 * math.sin(2 * math.pi * 85 * t) * math.exp(-20 * t))
             for _ in range(18):
                 sparkle = start + int(rng.uniform(.08, .7) * sample_rate)
                 frequency = rng.uniform(1400, 3200)
@@ -118,24 +118,24 @@ def generate_audio():
                     if sparkle + i >= len(samples):
                         break
                     t = i / sample_rate
-                    samples[sparkle + i] += .035 * math.exp(-150 * t) * math.sin(2 * math.pi * frequency * t)
+                    samples[sparkle + i] += .025 * math.exp(-150 * t) * math.sin(2 * math.pi * frequency * t)
         return samples
 
     def sad_notes():
         # A descending A-minor phrase, gentle rather than a harsh error buzzer.
         samples = []
-        for frequency, duration in [(440, .25), (349.23, .28), (261.63, .4)]:
+        for frequency, duration in [(440, .5), (349.23, .56), (261.63, .8)]:
             for i in range(int(duration * sample_rate)):
                 t = i / sample_rate
-                envelope = min(1, t / .025) * max(0, 1 - t / duration) ** 1.7
+                envelope = min(1, t / .04) * max(0, 1 - t / duration) ** 1.7
                 samples.append(.2 * envelope * (math.sin(2 * math.pi * frequency * t) + .15 * math.sin(2 * math.pi * frequency * 2 * t)))
-            samples.extend([0.0] * int(.045 * sample_rate))
+            samples.extend([0.0] * int(.09 * sample_rate))
         return samples
 
-    tracks = {'correct': firework(2.6, [0, .25]), 'wrong': sad_notes(), 'complete': firework(3.2, [0, .2, .45, .7])}
+    tracks = {'correct': firework(5.2, [0, .55, 1.1, 1.7, 2.3, 3.0]), 'wrong': sad_notes(), 'complete': firework(6.4, [0, .6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2])}
     for name, samples in tracks.items():
         pcm = bytearray()
-        gain = min(2.4, .55 / max(max(abs(sample) for sample in samples), .001))
+        gain = min(2.4, .5 / max(max(abs(sample) for sample in samples), .001))
         for sample in samples:
             pcm.extend(struct.pack('<h', round(max(-.65, min(.65, sample * gain)) * 32767)))
         encoder = lameenc.Encoder()
