@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf7ef">
+  <meta name="description" content="Cùng bé khám phá tình cảm, hành động và thái độ dành cho cô giáo qua trò chơi sơ đồ tư duy.">
+  <title>Cô giáo của bé · Vườn nhỏ học vui</title>
+  <link rel="icon" href="assets/images/flower.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/game-data.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/game.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Vườn nhỏ học vui — trang trò chơi">
+      <img src="assets/images/flower.svg" width="42" height="42" alt="">
+      <span>vườn nhỏ<span class="brand-subtitle">HỌC VUI MỖI NGÀY</span></span>
+    </a>
+    <div class="header-actions">
+      <span class="age-badge">Dành cho bé 3–6 tuổi</span>
+      <button class="reset-button" id="reset-button" type="button" aria-label="Chơi lại từ đầu" title="Chơi lại từ đầu"><span aria-hidden="true">♡</span><span class="reset-label">Chơi lại</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="game-title">
+      <p class="eyebrow"><span aria-hidden="true">✦</span> MỘT SƠ ĐỒ NHỎ, THẬT NHIỀU YÊU THƯƠNG</p>
+      <h1 id="game-title">Cô giáo <em>của bé</em></h1>
+      <p class="intro-description">Bé chọn những bức tranh phù hợp để kể câu chuyện về cô giáo nhé!</p>
+      <div class="progress-pill" role="group" aria-label="Tiến độ trò chơi"><span class="progress-star" aria-hidden="true">★</span><span id="progress-text">Bé đã khám phá <strong>0/7</strong> bức tranh</span><span class="progress-dots" id="progress-dots" aria-hidden="true"></span></div>
+    </section>
+
+    <p class="storage-notice" id="storage-notice" role="status" hidden>Trình duyệt chưa lưu được tiến độ. Bé vẫn chơi được, nhưng tiến độ có thể mất khi đóng trang.</p>
+
+    <section class="mindmap" id="mindmap" aria-label="Sơ đồ tư duy về cô giáo">
+      <svg class="connections" id="connections" aria-hidden="true"><path data-branch="emotion"></path><path data-branch="action"></path><path data-branch="attitude"></path></svg>
+      <span class="decoration doodle-spark" aria-hidden="true">✧</span>
+      <span class="decoration doodle-flower" aria-hidden="true">✿</span>
+      <div class="central-node" id="central-node">
+        <span class="central-kicker">NGƯỜI BÉ YÊU QUÝ</span>
+        <div id="central-slot"></div>
+        <h2>Cô giáo của bé</h2>
+        <p>Mỗi ngày đến lớp là một niềm vui</p>
+      </div>
+      <div id="branches" class="branches"></div>
+    </section>
+
+    <div class="play-hint"><span class="hint-icon" aria-hidden="true">☝</span><p>Chạm vào ô có dấu <strong>+</strong> để chọn tranh.<span>Bé có thể bắt đầu ở bất cứ ô nào!</span></p></div>
+    <p class="sr-only" id="game-status" role="status" aria-live="polite"></p>
+  </main>
+
+  <footer><span class="footer-flower" aria-hidden="true">✿</span> Mỗi điều nhỏ bé, một bài học yêu thương <span class="footer-dot" aria-hidden="true">·</span><span>Chơi, khám phá & lớn khôn</span></footer>
+
+  <dialog class="game-dialog selection-dialog" id="selection-dialog" aria-labelledby="selection-title" aria-describedby="selection-instruction">
+    <button class="dialog-close" type="button" data-close="selection" aria-label="Đóng chọn tranh">×</button>
+    <p class="eyebrow" id="selection-kicker">BÉ CÙNG CHỌN NHÉ</p>
+    <h2 id="selection-title">Chọn một bức tranh</h2>
+    <p class="dialog-description" id="selection-instruction"></p>
+    <div class="image-options" id="image-options"></div>
+    <p class="selection-feedback" id="selection-feedback" role="status" aria-live="polite">Bé chạm vào bức tranh mình chọn nhé!</p>
+  </dialog>
+
+  <dialog class="game-dialog reset-dialog" id="reset-dialog" aria-labelledby="reset-title">
+    <button class="dialog-close" type="button" data-close="reset" aria-label="Tiếp tục chơi">×</button>
+    <div class="dialog-symbol reset-symbol" aria-hidden="true">♡</div>
+    <h2 id="reset-title">Mình cùng chơi lại nhé?</h2>
+    <p class="dialog-description">Bạn có muốn bắt đầu lại trò chơi không?</p>
+    <div class="dialog-actions"><button class="button button-secondary" id="cancel-reset" type="button" autofocus>Tiếp tục</button><button class="button button-primary" id="confirm-reset" type="button">Chơi lại</button></div>
+  </dialog>
+
+  <dialog class="game-dialog completion-dialog" id="completion-dialog" aria-labelledby="completion-title">
+    <button class="dialog-close" type="button" data-close="completion" aria-label="Đóng lời chúc mừng">×</button>
+    <div class="celebration" aria-hidden="true"><span>✦</span><span>✧</span><span>★</span><span>✦</span><span>✧</span></div>
+    <div class="dialog-symbol completion-symbol" aria-hidden="true">★</div>
+    <p class="eyebrow">7 BỨC TRANH · THẬT NHIỀU YÊU THƯƠNG</p>
+    <h2 id="completion-title">Bé giỏi quá!</h2>
+    <p class="dialog-description">Chúc mừng bé đã hoàn thành trò chơi!</p>
+    <p class="completion-note">Cô giáo sẽ rất vui với những điều bé vừa khám phá.</p>
+    <button class="button button-primary" id="view-map" type="button" autofocus>Xem sơ đồ của bé <span aria-hidden="true">→</span></button>
+  </dialog>
+  <noscript><p class="storage-notice">Vui lòng bật JavaScript trong trình duyệt để chơi trò chơi.</p></noscript>
+</body>
+</html>

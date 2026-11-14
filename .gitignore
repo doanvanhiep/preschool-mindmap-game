@@ -1,0 +1,6 @@
+.tools/
+.qa/
+__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260" role="img">
+    <rect x="8" y="9" width="304" height="242" rx="60" fill="#f4eddb"/>
+    <circle cx="262" cy="47" r="22" fill="#fff" opacity=".32"/>
+    <ellipse cx="160" cy="224" rx="125" ry="13" fill="#a38d70" opacity=".08"/>
+    <g opacity=".75"><g transform="translate(249 106) scale(0.65)">
+      <ellipse cy="118" rx="36" ry="6" fill="#99856a" opacity=".10"/>
+      <path d="M-15 84 L-17 112 M15 84 L18 112" stroke="#be9176" stroke-width="12" stroke-linecap="round"/>
+      <path d="M-23 114 h15 M12 114 h15" stroke="#675649" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-20 37 Q0 30 20 37 L30 87 Q0 99 -30 87 Z" fill="#a8b6a2"/>
+      <g fill="none" stroke="#edba93" stroke-width="12" stroke-linecap="round"><path d="M-25 53 Q-44 34 -39 14 M25 53 L36 79"/></g>
+      <path d="M-26 -2 Q-27 -38 0 -36 Q33 -35 29 5 L30 32 Q11 38 -27 28Z" fill="#705446"/>
+      <ellipse cy="1" rx="25" ry="29" fill="#f2c7a6"/>
+      <path d="M-25 -6 Q-26 -36 2 -35 Q30 -34 27 -5 Q10 -11 4 -24 Q-5 -10 -25 -6" fill="#705446"/>
+      <ellipse cx="-9" cy="2" rx="2" ry="2.6" fill="#675649"/><ellipse cx="10" cy="2" rx="2" ry="2.6" fill="#675649"/>
+      <ellipse cx="-16" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/><ellipse cx="17" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/>
+      <path d="M-5 14 Q1 20 7 13" fill="none" stroke="#675649" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 -4 Q39 1 31 31" stroke="#705446" stroke-width="13" fill="none"/>
+    </g></g><g transform="translate(87 145) scale(0.82)">
+      <ellipse cy="96" rx="36" ry="6" fill="#99856a" opacity=".10"/>
+      <path d="M-15 62 L-17 90 M15 62 L18 90" stroke="#be9176" stroke-width="12" stroke-linecap="round"/>
+      <path d="M-23 92 h15 M12 92 h15" stroke="#675649" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-20 37 Q0 30 20 37 L30 65 Q0 77 -30 65 Z" fill="#d9b392"/>
+      <g fill="none" stroke="#edba93" stroke-width="12" stroke-linecap="round"><path d="M-25 53 Q-44 34 -39 14 M25 53 L36 79"/></g>
+      <path d="M-26 -2 Q-27 -38 0 -36 Q33 -35 29 5 L30 32 Q11 38 -27 28Z" fill="#705446"/>
+      <ellipse cy="1" rx="25" ry="29" fill="#f2c7a6"/>
+      <path d="M-25 -6 Q-26 -36 2 -35 Q30 -34 27 -5 Q10 -11 4 -24 Q-5 -10 -25 -6" fill="#705446"/>
+      <ellipse cx="-9" cy="2" rx="2" ry="2.6" fill="#675649"/><ellipse cx="10" cy="2" rx="2" ry="2.6" fill="#675649"/>
+      <ellipse cx="-16" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/><ellipse cx="17" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/>
+      <path d="M-5 14 Q1 20 7 13" fill="none" stroke="#675649" stroke-width="2" stroke-linecap="round"/>
+
+    </g><g transform="translate(174 151) scale(0.77)">
+      <ellipse cy="96" rx="36" ry="6" fill="#99856a" opacity=".10"/>
+      <path d="M-15 62 L-17 90 M15 62 L18 90" stroke="#be9176" stroke-width="12" stroke-linecap="round"/>
+      <path d="M-23 92 h15 M12 92 h15" stroke="#675649" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-20 37 Q0 30 20 37 L30 65 Q0 77 -30 65 Z" fill="#a6b9ca"/>
+      <g fill="none" stroke="#edba93" stroke-width="12" stroke-linecap="round"><path d="M-25 53 Q-47 54 -54 37 M25 53 Q45 54 53 38"/></g>
+      <path d="M-26 -2 Q-27 -38 0 -36 Q33 -35 29 5 L30 32 Q11 38 -27 28Z" fill="#705446"/>
+      <ellipse cy="1" rx="25" ry="29" fill="#f2c7a6"/>
+      <path d="M-25 -6 Q-26 -36 2 -35 Q30 -34 27 -5 Q10 -11 4 -24 Q-5 -10 -25 -6" fill="#705446"/>
+      <ellipse cx="-9" cy="2" rx="2" ry="2.6" fill="#675649"/><ellipse cx="10" cy="2" rx="2" ry="2.6" fill="#675649"/>
+      <ellipse cx="-16" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/><ellipse cx="17" cy="12" rx="6" ry="3.5" fill="#e9a18f" opacity=".55"/>
+      <path d="M-5 14 Q1 20 7 13" fill="none" stroke="#675649" stroke-width="2" stroke-linecap="round"/>
+
+    </g><path d="M40 61Q40 43 61 43H104Q122 43 122 61V78Q122 92 103 92L87 105 87 92H58Q40 92 40 76Z" fill="#fffaf0"/><path d="M137 92Q137 75 153 75H188Q204 75 204 91V105Q204 118 188 118H174L165 129 162 118H152Q137 118 137 104Z" fill="#fffaf0"/><g fill="#c4b38c"><circle cx="63" cy="68" r="3"/><circle cx="81" cy="68" r="3"/><circle cx="99" cy="68" r="3"/><circle cx="156" cy="97" r="3"/><circle cx="172" cy="97" r="3"/><circle cx="188" cy="97" r="3"/></g></svg>
