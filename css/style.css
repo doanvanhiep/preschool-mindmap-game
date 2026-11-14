@@ -12,3 +12,32 @@ main{max-width:1280px;margin:auto;padding:0 44px}.intro{text-align:center;paddin
 @media(max-width:1000px) and (min-width:701px){main{padding:0 28px}.site-header{padding:22px 28px}.mindmap{column-gap:29px;row-gap:24px;min-height:560px}.branch{padding:16px 12px}.branch-heading{gap:7px}.branch-heading h2{font-size:12px}.branch-heading p{font-size:8px}.branch-icon{width:27px;height:29px;font-size:22px}.branch-number{display:none}.branch-slots{gap:8px}.image-slot{min-height:127px}.image-slot img{height:80px}.slot-caption{font-size:9px}.central-node{padding:19px 10px 16px}.central-node h2{font-size:17px}.central-node .image-slot{height:180px}.central-node .image-slot img{height:134px}.central-node .slot-prompt{font-size:10px}.central-kicker{font-size:7px;letter-spacing:1px}.central-node>p{font-size:8px}.doodle-spark{left:34%}.doodle-flower{left:13%}}
 @media(max-width:700px){.site-header{padding:18px 21px}.brand{font-size:21px}.brand img{width:36px;height:36px}.brand-subtitle{font-size:7px;letter-spacing:1.7px}.header-actions{gap:0}.age-badge{display:none}.reset-button{padding:6px 13px;font-size:11px;gap:6px}main{padding:0 20px}.intro{padding:30px 0 18px}.eyebrow{font-size:8px;letter-spacing:1.3px}h1{font-size:43px;letter-spacing:-2px;margin-top:9px}.intro-description{font-size:12px;max-width:290px;margin:auto;line-height:1.9}.progress-pill{gap:7px;padding:10px 12px;margin-top:17px;font-size:10px}.progress-dots{gap:3px;margin:0}.progress-dots span{width:5px;height:5px}.mindmap{display:flex;flex-direction:column;gap:28px;padding:15px 0 15px 27px;min-height:0;max-width:440px;border-radius:30px;background-size:21px 21px}.central-node{align-self:center;width:230px;transform:none;padding:17px 15px}.central-node .image-slot{height:185px}.central-node .image-slot img{height:140px}.central-kicker{margin:6px 0 14px}.central-node h2{font-size:18px;margin-top:13px}.central-node>p{font-size:9px}.branch{width:100%;transform:none;padding:17px 17px 18px}.branch-emotion{margin-top:7px}.branch-heading h2{font-size:15px}.branch-heading p{font-size:9px}.branch-heading{margin-bottom:13px}.image-slot{min-height:137px}.image-slot img{height:95px}.slot-caption{font-size:10px}.branch-slots{gap:12px}.branch-number{font-size:11px}.doodle-spark{left:0;top:65px;font-size:35px}.doodle-flower{left:auto;right:-3px;top:0;font-size:31px;bottom:auto}.play-hint{margin:20px 0 25px;gap:9px}.play-hint p{font-size:11px}.play-hint p span{font-size:9px}footer{padding:16px 20px 23px;flex-wrap:wrap;gap:5px;font-size:9px}.footer-dot{display:none}footer>span:last-child{width:100%;text-align:center}.game-dialog{padding:40px 18px 21px;border-radius:24px}.game-dialog h2{font-size:22px}.game-dialog .eyebrow{font-size:8px;margin-left:20px;margin-right:20px}.dialog-description{font-size:12px}.image-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0 14px}.option-card{border-radius:16px;padding:5px 5px 12px}.option-card img{height:116px}.option-card span{font-size:11px;margin-top:2px}.selection-feedback{font-size:11px}.dialog-close{width:40px;height:40px;top:8px;right:8px}.reset-dialog,.completion-dialog{padding:34px 20px}.reset-dialog h2{font-size:21px}.dialog-actions{gap:9px}.button{padding:12px 18px}.dialog-symbol{width:70px;height:70px;font-size:43px}.completion-note{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Each branch splits into two visible arrows ending just above its image slots. */
+.branch { isolation: isolate; }
+.branch-connectors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.branch-connectors path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.branch-heading { position: relative; z-index: 1; margin-bottom: 0; }
+.branch-slots { position: relative; z-index: 1; margin-top: 34px; }
+.image-slot { min-height: 158px; }
+.image-slot img { height: 112px; }
+.slot-caption, .slot-prompt { font-size: 11px; }
+.central-node .image-slot { height: 252px; }
+.central-node .image-slot img { height: 210px; }
+.option-card img { height: 235px; }
+@media (max-width: 700px) {
+  .option-card img { height: 170px; }
+}

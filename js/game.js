@@ -81,7 +81,23 @@
       const number = document.createElement('span'); number.className = 'branch-number'; number.textContent = branch.number; number.setAttribute('aria-hidden', 'true');
       titles.append(subtitle, title); heading.append(icon, titles, number);
       const slots = document.createElement('div'); slots.className = 'branch-slots'; slots.append(...branch.slots.map(createSlot));
-      section.append(heading, slots); return section;
+      const connectors = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      connectors.classList.add('branch-connectors');
+      connectors.setAttribute('aria-hidden', 'true');
+      const defs = document.createElementNS(connectors.namespaceURI, 'defs');
+      const marker = document.createElementNS(connectors.namespaceURI, 'marker');
+      marker.id = `arrow-${branch.id}`;
+      Object.entries({ viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto', markerUnits: 'userSpaceOnUse' }).forEach(([name, value]) => marker.setAttribute(name, value));
+      const tip = document.createElementNS(connectors.namespaceURI, 'path');
+      tip.setAttribute('d', 'M 1 1 L 9 5 L 1 9'); tip.classList.add('arrow-tip');
+      marker.append(tip); defs.append(marker); connectors.append(defs);
+      branch.slots.forEach(slotId => {
+        const path = document.createElementNS(connectors.namespaceURI, 'path');
+        path.dataset.targetSlot = slotId;
+        path.setAttribute('marker-end', `url(#arrow-${branch.id})`);
+        connectors.append(path);
+      });
+      section.append(connectors, heading, slots); return section;
     }));
     $('progress-text').replaceChildren(document.createTextNode('Bé đã khám phá '));
     const strong = document.createElement('strong'); strong.textContent = `${state.progress}/7`;
@@ -97,17 +113,30 @@
     const y1 = central.top - board.top + central.height / 2;
     $('connections').setAttribute('viewBox', `0 0 ${board.width} ${board.height}`);
     data.branches.forEach(branch => {
-      const rect = document.querySelector(`.branch-${branch.id}`).getBoundingClientRect();
+      const section = document.querySelector(`.branch-${branch.id}`);
+      const rect = section.getBoundingClientRect();
+      const heading = section.querySelector('.branch-heading').getBoundingClientRect();
       let x2, y2, path;
       if (mobile) {
-        x2 = 16; y2 = rect.top - board.top + 40;
+        x2 = 16; y2 = heading.top - board.top + heading.height / 2;
         path = `M ${x1} ${y1} H ${x2} V ${y2} H ${rect.left - board.left + 10}`;
       } else {
-        x2 = rect.left - board.left + rect.width / 2; y2 = rect.top - board.top + rect.height / 2;
+        x2 = rect.left - board.left + rect.width / 2; y2 = heading.top - board.top + heading.height / 2;
         const bend = (x1 + x2) / 2;
         path = `M ${x1} ${y1} C ${bend} ${y1}, ${bend} ${y2}, ${x2} ${y2}`;
       }
       $('connections').querySelector(`[data-branch="${branch.id}"]`).setAttribute('d', path);
+      const connectors = section.querySelector('.branch-connectors');
+      connectors.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+      const startX = heading.left - rect.left + heading.width / 2;
+      const startY = heading.bottom - rect.top + 3;
+      branch.slots.forEach(slotId => {
+        const target = section.querySelector(`[data-slot="${slotId}"]`).getBoundingClientRect();
+        const targetX = target.left - rect.left + target.width / 2;
+        const targetY = target.top - rect.top - 4;
+        const middleY = startY + (targetY - startY) / 2;
+        connectors.querySelector(`[data-target-slot="${slotId}"]`).setAttribute('d', `M ${startX} ${startY} C ${startX} ${middleY}, ${targetX} ${middleY}, ${targetX} ${targetY}`);
+      });
     });
   }
   function showDialog(name) {

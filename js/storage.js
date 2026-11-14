@@ -3,10 +3,10 @@
   const data = global.MindMapData;
   const KEY = 'preschool_mindmap_game_v1';
   function createInitialState() {
-    return { version: 1, slots: Object.fromEntries(data.slotIds.map(id => [id, { imageId: null, completed: false }])), activeSlot: null, modal: null, progress: 0, completed: false };
+    return { version: 1, contentVersion: data.contentVersion, slots: Object.fromEntries(data.slotIds.map(id => [id, { imageId: null, completed: false }])), activeSlot: null, modal: null, progress: 0, completed: false };
   }
   function validateState(state) {
-    if (!state || typeof state !== 'object' || state.version !== 1 || !state.slots || typeof state.slots !== 'object' || Array.isArray(state.slots)) return false;
+    if (!state || typeof state !== 'object' || state.version !== 1 || state.contentVersion !== data.contentVersion || !state.slots || typeof state.slots !== 'object' || Array.isArray(state.slots)) return false;
     if (Object.keys(state.slots).length !== data.slotIds.length) return false;
     let progress = 0;
     for (const group of data.groups) {

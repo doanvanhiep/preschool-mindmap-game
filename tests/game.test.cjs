@@ -39,6 +39,20 @@ test('initial state is valid and every empty slot is freely selectable', () => {
     assert.ok(storage.validateState(open));
   }
 });
+test('the supplied picture set and branch labels match the requested correct and wrong answers', () => {
+  assert.equal(data.title, 'Cô giáo của con');
+  assert.deepEqual(clone(data.branches.map(group => group.title)), ['Hoạt động của cô', 'Thái độ của cô', 'Tình cảm của bé']);
+  const expected = {
+    central: { ttd: true, tt1s: false, tt2s: false },
+    action: { hdcc1d: true, hdcc2d: true, hdccs: false },
+    attitude: { tdcc1d: true, tdcc2d: true, tdccs: false },
+    emotion: { tcct1d: true, tcct2d: true, tccts: false }
+  };
+  for (const group of data.groups) {
+    assert.deepEqual(Object.fromEntries(group.options.map(option => [option.id, option.isCorrect])), expected[group.id]);
+    for (const option of group.options) assert.equal(path.extname(option.src), ['tt1s', 'tt2s'].includes(option.id) ? '.png' : '.jpg');
+  }
+});
 for (const group of data.groups) {
   test(`${group.id}: a wrong answer leaves the state, options and open modal unchanged`, () => {
     const state = rules.openSlot(storage.createInitialState(), group.slots.at(-1));
@@ -71,7 +85,7 @@ for (const group of data.branches) {
         assert.ok(!available.some(option => option.id === images[0].id));
         const open = rules.openSlot(state, slots[1]);
         assert.equal(rules.chooseImage(open, images[0].id).changed, false);
-        assert.equal(rules.chooseImage(open, 'teacher').changed, false);
+        assert.equal(rules.chooseImage(open, 'ttd').changed, false);
         state = rules.chooseImage(open, images[1].id).state;
         assert.equal(state.progress, 2);
         assert.ok(storage.validateState(state));
@@ -90,27 +104,27 @@ test('completion happens on the seventh selection and can be dismissed without r
   assert.equal(closed.modal, null);
   assert.equal(closed.completed, true);
   assert.ok(storage.validateState(closed));
-  assert.equal(rules.chooseImage(state, 'teacher').changed, false);
+  assert.equal(rules.chooseImage(state, 'ttd').changed, false);
 });
 test('invalid slot and image IDs cannot mutate state', () => {
   const state = storage.createInitialState();
   assert.equal(rules.openSlot(state, 'unknown'), state);
   assert.equal(rules.openSlot(state, '__proto__'), state);
-  assert.equal(rules.chooseImage(state, 'teacher').state, state);
+  assert.equal(rules.chooseImage(state, 'ttd').state, state);
   const opened = rules.openSlot(state, 'central');
   assert.equal(rules.chooseImage(opened, 'unknown').state, opened);
 });
 test('persistence restores selections, filtered options and the active modal', () => {
   const memory = new Map();
   const store = storage.createStore(() => ({ getItem: key => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, value) }));
-  let state = select(storage.createInitialState(), 'emotion-2', 'gratitude');
+  let state = select(storage.createInitialState(), 'emotion-2', 'tcct2d');
   state = rules.openSlot(state, 'emotion-1');
   assert.ok(store.save(state));
   const restored = store.load();
   assert.equal(restored.available, true);
   assert.deepEqual(clone(restored.state), clone(state));
   assert.equal(rules.getAvailableOptions(restored.state, 'emotion-1').length, 2);
-  assert.ok(!rules.getAvailableOptions(restored.state, 'emotion-1').some(option => option.id === 'gratitude'));
+  assert.ok(!rules.getAvailableOptions(restored.state, 'emotion-1').some(option => option.id === 'tcct2d'));
   const reset = store.reset();
   assert.equal(reset.saved, true);
   assert.equal(store.load().state.progress, 0);
@@ -124,12 +138,14 @@ test('a dismissed completion remains dismissed after storage restore', () => {
 });
 const mutations = {
   'unsupported version': state => { state.version = 2; },
+  'missing content version from the placeholder set': state => { delete state.contentVersion; },
+  'outdated content version': state => { state.contentVersion = 1; },
   'missing slot': state => { delete state.slots['emotion-1']; },
   'extra slot': state => { state.slots.extra = { imageId: null, completed: false }; },
   'unknown image': state => { state.slots.central = { imageId: 'unknown', completed: true }; },
-  'wrong image': state => { state.slots.central = { imageId: 'doctor', completed: true }; },
-  'foreign image': state => { state.slots['action-1'] = { imageId: 'teacher', completed: true }; },
-  'duplicate image': state => { state.slots['emotion-1'] = { imageId: 'love', completed: true }; state.slots['emotion-2'] = { imageId: 'love', completed: true }; state.progress = 2; },
+  'wrong image': state => { state.slots.central = { imageId: 'tt1s', completed: true }; },
+  'foreign image': state => { state.slots['action-1'] = { imageId: 'ttd', completed: true }; },
+  'duplicate image': state => { state.slots['emotion-1'] = { imageId: 'tcct1d', completed: true }; state.slots['emotion-2'] = { imageId: 'tcct1d', completed: true }; state.progress = 2; },
   'mismatched completion': state => { state.slots.central.completed = true; },
   'mismatched progress': state => { state.progress = 2; },
   'premature completion flag': state => { state.completed = true; },
@@ -150,7 +166,7 @@ for (const [name, mutate] of Object.entries(mutations)) {
   });
 }
 test('an active modal pointing to a completed slot is rejected', () => {
-  const state = select(storage.createInitialState(), 'central', 'teacher');
+  const state = select(storage.createInitialState(), 'central', 'ttd');
   state.activeSlot = 'central'; state.modal = 'selection';
   assert.equal(storage.validateState(state), false);
 });
