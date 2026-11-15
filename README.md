@@ -20,7 +20,7 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 
 ## Cách chơi
 
-- Chạm “Bài thơ có tên là gì?” để hiện “Cô giáo của con”, rồi chạm “Tác giả là ai?” để hiện “Hà Quang”. Sau đó ô trung tâm bắt đầu nhấp nháy và có thể chọn tranh.
+- Ban đầu chỉ có hình bàn tay trong nút tròn. Chạm hình để hiện “Bài thơ có tên là gì?”, chạm câu hỏi để hiện “Cô giáo của con”. Bên dưới xuất hiện bàn tay thứ hai; chạm để hiện “Tác giả là ai?”, chạm câu hỏi để hiện “Hà Quang”. Sau đó ô trung tâm bắt đầu nhấp nháy và có thể chọn tranh. Không có chữ gợi ý nhỏ trước hai câu hỏi.
 - Chơi theo thứ tự: trung tâm → Hoạt động của cô → Thái độ của cô → Tình cảm của bé. Điền đủ tranh của nhóm hiện tại mới mở nhóm tiếp theo; các ô đang được chọn có viền nhấp nháy nhẹ, các ô chưa tới lượt bị khóa. Trong cùng một nhánh vẫn có thể chọn hai ô theo bất kỳ thứ tự nào.
 - Ô trung tâm có 3 tranh, một tranh đúng.
 - Mỗi nhánh có 3 tranh, hai tranh đúng. Ô nào được điền trước cũng có 3 lựa chọn; ô còn lại có 2 lựa chọn. Tranh đúng đã dùng không được chọn lại.
@@ -30,7 +30,7 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 - Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa ở nhiều vùng trên toàn màn hình. Chọn sai phát giai điệu buồn nhẹ.
 - Âm thanh đúng/hoàn thành chỉ có tiếng pháo hoa nhẹ và tiếng lách tách trong khoảng 1,8 giây, bắt đầu khi ảnh tới ô và pháo hoa xuất hiện, không có tiếng rít mở đầu. Âm thanh sai dài khoảng 2,1 giây. Hiệu ứng mới thay thế hiệu ứng cũ nếu bé tiếp tục chọn đúng, tránh chồng nhiều màn pháo hoa.
 - Đáp án được lưu trước hiệu ứng; trong lúc ảnh bay, thao tác chọn tiếp và chơi lại tạm khóa. Tải lại trang giữa hiệu ứng vẫn giữ ảnh đúng, không tự phát lại hiệu ứng hoặc âm thanh.
-- Tải lại trang để tiếp tục, kể cả bước hiện tên bài thơ/tác giả và khi đang mở hộp chọn tranh. Tiến độ từ phiên bản cũ vẫn giữ ảnh đã điền và tiếp tục từ nhóm đầu tiên chưa đủ tranh. Chơi lại đặt cả hai câu hỏi và toàn bộ ảnh về ban đầu.
+- Tải lại trang để tiếp tục, kể cả hình bàn tay, câu hỏi, đáp án tên bài thơ/tác giả và khi đang mở hộp chọn tranh. Tiến độ từ phiên bản cũ giữ ảnh và đáp án đã hiện; câu hỏi chưa trả lời chuyển thành hình bàn tay. Chơi lại đưa về hình bàn tay đầu tiên và xóa ảnh đã điền. Nút gợi ý hỗ trợ Enter/Space; bấm đúp và giữ phím không bỏ qua câu hỏi vừa hiện.
 - Hoàn thành 7 ô để nhận lời chúc mừng. Đóng lời chúc mừng để xem sơ đồ; dùng nút trái tim ở đầu trang để chơi lại.
 - Các hộp thoại dùng được bằng bàn phím, hỗ trợ Escape, giữ focus và trả focus khi đóng. Khi bật giảm chuyển động, ảnh điền ngay với viền sáng tĩnh, không có ảnh bay hoặc hạt pháo hoa.
 
@@ -83,14 +83,15 @@ node --check js/storage.js
 node --check js/game.js
 ```
 
-Kiểm thử tự động bao gồm hai bước hiện tên bài thơ/tác giả, khóa nhóm theo thứ tự, thứ tự điền trái/phải trong nhóm, thứ tự dùng hai đáp án đúng, chống dùng lại ảnh, hoàn thành, khôi phục hộp chọn ảnh, nâng cấp tiến độ cũ, JSON hỏng, dữ liệu mâu thuẫn và LocalStorage bị chặn/đầy.
+Kiểm thử tự động bao gồm hình gợi ý → câu hỏi → đáp án của bài thơ/tác giả, khóa nhóm theo thứ tự, thứ tự điền trái/phải trong nhóm, thứ tự dùng hai đáp án đúng, chống dùng lại ảnh, hoàn thành, khôi phục hộp chọn ảnh, nâng cấp tiến độ cũ, JSON hỏng, dữ liệu mâu thuẫn và LocalStorage bị chặn/đầy.
 
 Kiểm tra thực tế trên trình duyệt: âm thanh đúng/sai/hoàn thành, nhấp nhanh, đóng bằng X/Escape, hủy và xác nhận chơi lại; reload giữa chừng/khi chọn ảnh/sau hoàn thành; desktop, tablet và mobile 360 px không tràn ngang. Kiểm tra thêm đường dẫn ảnh/âm thanh sau khi xuất bản.
 
 ### Cập nhật luồng chơi — 15/11/2026
 
-- 51/51 kiểm thử Node đạt; ba tệp JavaScript qua kiểm tra cú pháp.
-- Chrome: dùng Enter để hiện tên bài thơ rồi tác giả; ô trung tâm chỉ mở và nhấp nháy sau khi hiện tác giả. Chơi đủ 7 ô theo thứ tự, thử chọn phải trước, chọn lặp khi ảnh bay, reload câu hỏi/hộp chọn ảnh, đóng lời chúc mừng và chơi lại đều đạt.
+- 59/59 kiểm thử Node đạt; ba tệp JavaScript qua kiểm tra cú pháp.
+- Chrome: hình bàn tay 80 px hiện trước mỗi câu hỏi, không có chữ gợi ý nhỏ. Bấm liên tiếp không bỏ qua câu hỏi, Enter/Space hoạt động và giữ phím bị chặn. Reload tại cả năm trạng thái giữ đúng hình/câu hỏi/đáp án. Ô trung tâm chỉ mở và nhấp nháy sau khi hiện tác giả.
+- Chơi đủ 7 ô theo thứ tự, thử chọn phải trước, chọn lặp khi ảnh bay, reload hộp chọn ảnh, đóng lời chúc mừng và chơi lại đều đạt. Tiến độ từ bản cũ giữ cả ảnh đã điền và hộp chọn ảnh đang mở.
 - Không tràn ngang ở 360, 768 và 1280 px. Chế độ giảm chuyển động thay nhấp nháy bằng viền sáng tĩnh. Không có lỗi console trong luồng hoàn thành.
 - Tiến độ cũ được giữ lại, với nhóm đầu tiên chưa đủ ảnh được mở tiếp. Tiêu đề ngoài “Hoạt động của cô” và tiêu đề trong “Cô vui vẻ tươi cười khi vào lớp” giữ nguyên.
 

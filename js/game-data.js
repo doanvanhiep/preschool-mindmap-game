@@ -18,7 +18,7 @@
   };
   const groups = [data.central, ...data.branches];
   const groupForSlot = slotId => groups.find(group => group.slots.includes(slotId));
-  const activeGroup = state => state.introStep === 2 ? groups.find(group => group.slots.some(id => !state.slots?.[id]?.completed)) : undefined;
+  const activeGroup = state => state.introStep === 2 && state.titleQuestionVisible && state.authorQuestionVisible ? groups.find(group => group.slots.some(id => !state.slots?.[id]?.completed)) : undefined;
   const isSlotAvailable = (state, slotId) => activeGroup(state)?.slots.includes(slotId) === true && !state.slots[slotId].completed;
   global.MindMapData = Object.freeze({ ...data, groups, groupForSlot, activeGroup, isSlotAvailable, slotIds: groups.flatMap(group => group.slots) });
 })(globalThis);

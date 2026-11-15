@@ -9,7 +9,10 @@ for (const file of ['game-data.js', 'storage.js', 'game.js']) vm.runInContext(fs
 const { MindMapData: data, MindMapStorage: storage, MindMapRules: rules } = context;
 const clone = value => JSON.parse(JSON.stringify(value));
 const select = (state, slot, image) => rules.chooseImage(rules.openSlot(state, slot), image).state;
-const readyState = () => rules.revealAuthor(rules.revealPoemTitle(storage.createInitialState()));
+const titleQuestionState = () => rules.showTitleQuestion(storage.createInitialState());
+const titledState = () => rules.revealPoemTitle(titleQuestionState());
+const authorQuestionState = () => rules.showAuthorQuestion(titledState());
+const readyState = () => rules.revealAuthor(authorQuestionState());
 function stateBeforeGroup(target) {
   let state = readyState();
   for (const group of data.groups) {
@@ -42,17 +45,32 @@ test('configuration defines seven slots, twelve unique local images, and the req
 test('the two questions must be revealed in order before the central slot unlocks', () => {
   const initial = storage.createInitialState();
   assert.ok(storage.validateState(initial));
+  assert.equal(initial.titleQuestionVisible, false);
+  assert.equal(initial.authorQuestionVisible, false);
+  assert.equal(rules.revealPoemTitle(initial), initial);
   assert.equal(rules.revealAuthor(initial), initial);
-  const titled = rules.revealPoemTitle(initial);
+  assert.equal(rules.showAuthorQuestion(initial), initial);
+  const question = rules.showTitleQuestion(initial);
+  assert.equal(question.introStep, 0);
+  assert.equal(question.titleQuestionVisible, true);
+  assert.equal(rules.showTitleQuestion(question), question);
+  const titled = rules.revealPoemTitle(question);
   assert.equal(titled.introStep, 1);
+  assert.equal(titled.authorQuestionVisible, false);
   assert.equal(rules.revealPoemTitle(titled), titled);
-  for (const state of [initial, titled]) {
+  assert.equal(rules.revealAuthor(titled), titled);
+  const authorQuestion = rules.showAuthorQuestion(titled);
+  assert.equal(authorQuestion.introStep, 1);
+  assert.equal(authorQuestion.authorQuestionVisible, true);
+  assert.equal(rules.showAuthorQuestion(authorQuestion), authorQuestion);
+  for (const state of [initial, question, titled, authorQuestion]) {
+    assert.ok(storage.validateState(state));
     for (const id of data.slotIds) {
       assert.equal(rules.openSlot(state, id), state);
       assert.equal(rules.getAvailableOptions(state, id).length, 0);
     }
   }
-  const ready = rules.revealAuthor(titled);
+  const ready = rules.revealAuthor(authorQuestion);
   assert.equal(ready.introStep, 2);
   assert.equal(rules.revealAuthor(ready), ready);
   assert.equal(rules.openSlot(ready, 'central').activeSlot, 'central');
@@ -171,19 +189,23 @@ test('persistence restores selections, filtered options and the active modal', (
   assert.equal(store.load().state.introStep, 0);
 });
 
-test('question reveals survive reload and reset returns to the title question', () => {
+test('every hint, question and answer survives reload and reset returns to the first hint', () => {
   let raw;
   const store = storage.createStore(() => ({ getItem: () => raw ?? null, setItem: (key, value) => { raw = value; } }));
-  for (const state of [storage.createInitialState(), rules.revealPoemTitle(storage.createInitialState()), readyState()]) {
+  for (const state of [storage.createInitialState(), titleQuestionState(), titledState(), authorQuestionState(), readyState()]) {
     assert.ok(store.save(state));
-    assert.equal(store.load().state.introStep, state.introStep);
+    assert.deepEqual(clone(store.load().state), clone(state));
   }
-  assert.equal(store.reset().state.introStep, 0);
+  const reset = store.reset().state;
+  assert.equal(reset.introStep, 0);
+  assert.equal(reset.titleQuestionVisible, false);
+  assert.equal(reset.authorQuestionVisible, false);
 });
 
 test('legacy progress keeps existing pictures and locks a later branch until earlier groups are filled', () => {
   const old = clone(storage.createInitialState());
   delete old.introStep;
+  delete old.titleQuestionVisible; delete old.authorQuestionVisible;
   old.slots['emotion-2'] = { imageId: 'tcct2d', completed: true };
   old.progress = 1;
   old.modal = 'selection'; old.activeSlot = 'emotion-1';
@@ -201,11 +223,35 @@ test('legacy progress keeps existing pictures and locks a later branch until ear
 test('legacy empty and completed games migrate without losing completion or skipping the new questions', () => {
   for (const state of [storage.createInitialState(), rules.closeModal(completedState())]) {
     const old = clone(state); delete old.introStep;
+    delete old.titleQuestionVisible; delete old.authorQuestionVisible;
     const migrated = storage.createStore(() => ({ getItem: () => JSON.stringify(old) })).load().state;
     assert.equal(migrated.progress, state.progress);
     assert.equal(migrated.introStep, state.completed ? 2 : 0);
     assert.equal(migrated.modal, null);
   }
+});
+
+test('previous guided-game states preserve answers and turn unanswered questions into hints', () => {
+  for (const state of [storage.createInitialState(), titledState(), readyState(), rules.openSlot(select(readyState(), 'central', 'ttd'), 'action-2'), rules.closeModal(completedState())]) {
+    const old = clone(state);
+    delete old.titleQuestionVisible; delete old.authorQuestionVisible;
+    const migrated = storage.createStore(() => ({ getItem: () => JSON.stringify(old) })).load().state;
+    assert.equal(migrated.introStep, state.introStep);
+    assert.equal(migrated.titleQuestionVisible, state.introStep > 0);
+    assert.equal(migrated.authorQuestionVisible, state.introStep === 2);
+    assert.equal(migrated.progress, state.progress);
+    assert.deepEqual(clone(migrated.slots), clone(state.slots));
+    assert.equal(migrated.modal, state.modal);
+    assert.equal(migrated.activeSlot, state.activeSlot);
+    assert.ok(storage.validateState(migrated));
+  }
+});
+
+test('an authored step with hidden questions cannot unlock picture slots', () => {
+  const state = { ...storage.createInitialState(), introStep: 2 };
+  assert.equal(storage.validateState(state), false);
+  assert.equal(data.activeGroup(state), undefined);
+  assert.equal(rules.openSlot(state, 'central'), state);
 });
 
 test('a forged selection for a locked group cannot award a picture or persist', () => {
@@ -225,6 +271,12 @@ const mutations = {
   'unsupported version': state => { state.version = 2; },
   'invalid intro step': state => { state.introStep = 3; },
   'non-numeric intro step': state => { state.introStep = '2'; },
+  'non-boolean title visibility': state => { state.titleQuestionVisible = 'true'; },
+  'non-boolean author visibility': state => { state.authorQuestionVisible = 1; },
+  'partially missing question flags': state => { delete state.titleQuestionVisible; },
+  'author question before title answer': state => { state.authorQuestionVisible = true; },
+  'title answer without title question': state => { state.introStep = 1; },
+  'author answer without author question': state => { state.introStep = 2; state.titleQuestionVisible = true; },
   'progress before revealing author': state => { state.slots.central = { imageId: 'ttd', completed: true }; state.progress = 1; state.introStep = 1; },
   'missing content version from the placeholder set': state => { delete state.contentVersion; },
   'outdated content version': state => { state.contentVersion = 1; },

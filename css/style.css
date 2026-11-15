@@ -29,6 +29,11 @@ h1 em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color:
 .poem-title:not(:disabled), .poem-author button:not(:disabled) { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: #9bad8a; text-underline-offset: 9px; }
 .poem-author { margin-top: 12px; font-size: 24px; font-weight: 650; color: #6f8b62; }
 .poem-author button { min-height: 44px; padding: 4px 12px; background: transparent; border-radius: 12px; }
+.intro h1 { min-height: 88px; display: grid; place-items: center; }
+.poem-author { min-height: 80px; display: grid; place-items: center; }
+.poem-title.is-hint, .poem-author button.is-hint { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; padding: 0; border: 1px solid #cddbb9; border-radius: 50%; background: #eef3df; text-decoration: none; box-shadow: 0 0 0 5px #d8e3be55; animation: hint-glow 1.8s ease-in-out infinite; }
+.is-hint img { width: 48px; height: 48px; }
+.poem-title.is-hint:hover, .poem-author button.is-hint:hover { background: #e4edce; }
 .progress-pill { display: inline-flex; align-items: center; gap: 12px; padding: 8px 15px; margin-top: 12px; border: 1px solid #e3e4d5; background: #f2f1e5; border-radius: 30px; font-size: 16px; }
 .progress-star { color: #c89e43; font-size: 21px; }
 .progress-dots { display: flex; gap: 5px; }
@@ -116,6 +121,7 @@ h1 em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color:
 @keyframes nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 @keyframes twinkle { 0%,100% { opacity: .5; transform: rotate(-10deg) scale(.8); } 50% { opacity: 1; transform: rotate(12deg) scale(1.1); } }
 @keyframes slot-pulse { 0%,100% { box-shadow: 0 0 0 2px #8da87925; } 50% { box-shadow: 0 0 0 8px #8da87955, 0 7px 24px #66865025; } }
+@keyframes hint-glow { 0%,100% { box-shadow: 0 0 0 4px #d8e3be55; } 50% { box-shadow: 0 0 0 9px #c5d6a66b, 0 5px 22px #8da87922; } }
 @media (max-width: 1000px) and (min-width: 701px) {
   main { padding: 0 24px; }
   .mindmap { column-gap: 36px; min-height: 600px; }

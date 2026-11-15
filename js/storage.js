@@ -3,12 +3,16 @@
   const data = global.MindMapData;
   const KEY = 'preschool_mindmap_game_v1';
   function createInitialState() {
-    return { version: 1, contentVersion: data.contentVersion, introStep: 0, slots: Object.fromEntries(data.slotIds.map(id => [id, { imageId: null, completed: false }])), activeSlot: null, modal: null, progress: 0, completed: false };
+    return { version: 1, contentVersion: data.contentVersion, introStep: 0, titleQuestionVisible: false, authorQuestionVisible: false, slots: Object.fromEntries(data.slotIds.map(id => [id, { imageId: null, completed: false }])), activeSlot: null, modal: null, progress: 0, completed: false };
   }
   function validateState(state) {
     if (!state || typeof state !== 'object' || state.version !== 1 || state.contentVersion !== data.contentVersion || !state.slots || typeof state.slots !== 'object' || Array.isArray(state.slots)) return false;
     if (Object.keys(state.slots).length !== data.slotIds.length) return false;
     if (![0, 1, 2].includes(state.introStep)) return false;
+    if (typeof state.titleQuestionVisible !== 'boolean' || typeof state.authorQuestionVisible !== 'boolean') return false;
+    if (state.introStep === 0 && state.authorQuestionVisible) return false;
+    if (state.introStep > 0 && !state.titleQuestionVisible) return false;
+    if (state.introStep === 2 && !state.authorQuestionVisible) return false;
     let progress = 0;
     for (const group of data.groups) {
       const used = new Set();
@@ -37,9 +41,13 @@
           let parsed = raw === null ? null : JSON.parse(raw);
           // Older games allowed any branch first. Keep their pictures and resume
           // at the first incomplete group under the new guided rules.
-          if (parsed && typeof parsed === 'object' && !Object.hasOwn(parsed, 'introStep')) {
-            parsed = { ...parsed, introStep: parsed.progress > 0 ? 2 : 0 };
-            if (parsed.modal === 'selection' && data.slotIds.includes(parsed.activeSlot) && parsed.slots?.[parsed.activeSlot]?.completed === false && !data.isSlotAvailable(parsed, parsed.activeSlot)) {
+          if (parsed && typeof parsed === 'object') {
+            const legacyIntro = !Object.hasOwn(parsed, 'introStep');
+            if (legacyIntro) parsed = { ...parsed, introStep: parsed.progress > 0 ? 2 : 0 };
+            if (!Object.hasOwn(parsed, 'titleQuestionVisible') && !Object.hasOwn(parsed, 'authorQuestionVisible')) {
+              parsed = { ...parsed, titleQuestionVisible: parsed.introStep > 0, authorQuestionVisible: parsed.introStep === 2 };
+            }
+            if (legacyIntro && parsed.modal === 'selection' && data.slotIds.includes(parsed.activeSlot) && parsed.slots?.[parsed.activeSlot]?.completed === false && !data.isSlotAvailable(parsed, parsed.activeSlot)) {
               parsed = { ...parsed, modal: null, activeSlot: null };
             }
           }
