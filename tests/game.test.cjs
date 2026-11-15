@@ -9,8 +9,18 @@ for (const file of ['game-data.js', 'storage.js', 'game.js']) vm.runInContext(fs
 const { MindMapData: data, MindMapStorage: storage, MindMapRules: rules } = context;
 const clone = value => JSON.parse(JSON.stringify(value));
 const select = (state, slot, image) => rules.chooseImage(rules.openSlot(state, slot), image).state;
+const readyState = () => rules.revealAuthor(rules.revealPoemTitle(storage.createInitialState()));
+function stateBeforeGroup(target) {
+  let state = readyState();
+  for (const group of data.groups) {
+    if (group === target) break;
+    const answers = group.options.filter(option => option.isCorrect);
+    group.slots.forEach((slot, i) => { state = select(state, slot, answers[i].id); });
+  }
+  return state;
+}
 function completedState() {
-  let state = storage.createInitialState();
+  let state = readyState();
   for (const group of data.groups) {
     const answers = group.options.filter(option => option.isCorrect);
     group.slots.forEach((slot, i) => { state = select(state, slot, answers[i].id); });
@@ -29,15 +39,43 @@ test('configuration defines seven slots, twelve unique local images, and the req
     for (const image of group.options) assert.ok(fs.existsSync(path.join(root, image.src.split('?')[0])), image.src);
   }
 });
-test('initial state is valid and every empty slot is freely selectable', () => {
+test('the two questions must be revealed in order before the central slot unlocks', () => {
   const initial = storage.createInitialState();
   assert.ok(storage.validateState(initial));
-  for (const id of data.slotIds) {
-    const open = rules.openSlot(initial, id);
-    assert.equal(open.activeSlot, id);
-    assert.equal(rules.getAvailableOptions(open, id).length, 3);
-    assert.ok(storage.validateState(open));
+  assert.equal(rules.revealAuthor(initial), initial);
+  const titled = rules.revealPoemTitle(initial);
+  assert.equal(titled.introStep, 1);
+  assert.equal(rules.revealPoemTitle(titled), titled);
+  for (const state of [initial, titled]) {
+    for (const id of data.slotIds) {
+      assert.equal(rules.openSlot(state, id), state);
+      assert.equal(rules.getAvailableOptions(state, id).length, 0);
+    }
   }
+  const ready = rules.revealAuthor(titled);
+  assert.equal(ready.introStep, 2);
+  assert.equal(rules.revealAuthor(ready), ready);
+  assert.equal(rules.openSlot(ready, 'central').activeSlot, 'central');
+  assert.equal(rules.getAvailableOptions(ready, 'central').length, 3);
+  for (const group of data.branches) for (const id of group.slots) assert.equal(rules.openSlot(ready, id), ready);
+});
+
+test('a group unlocks only after every slot of the previous group is complete', () => {
+  let state = readyState();
+  for (const group of data.groups) {
+    const answers = group.options.filter(option => option.isCorrect);
+    for (const [i, slot] of group.slots.entries()) {
+      for (const id of data.slotIds) {
+        const available = group.slots.includes(id) && !state.slots[id].completed;
+        assert.equal(data.isSlotAvailable(state, id), available, id);
+        if (!available) assert.equal(rules.openSlot(state, id), state);
+      }
+      state = select(state, slot, answers[i].id);
+      assert.ok(storage.validateState(state));
+    }
+  }
+  assert.equal(state.progress, 7);
+  assert.equal(data.activeGroup(state), undefined);
 });
 test('the supplied picture set and branch labels match the requested correct and wrong answers', () => {
   assert.equal(data.title, 'Cô giáo của con');
@@ -55,7 +93,7 @@ test('the supplied picture set and branch labels match the requested correct and
 });
 for (const group of data.groups) {
   test(`${group.id}: a wrong answer leaves the state, options and open modal unchanged`, () => {
-    const state = rules.openSlot(storage.createInitialState(), group.slots.at(-1));
+    const state = rules.openSlot(stateBeforeGroup(group), group.slots.at(-1));
     const before = JSON.stringify(state);
     const wrong = group.options.find(option => !option.isCorrect);
     const result = rules.chooseImage(state, wrong.id);
@@ -69,14 +107,15 @@ for (const group of data.branches) {
   for (const reverseSlots of [false, true]) {
     for (const reverseImages of [false, true]) {
       test(`${group.id}: slots ${reverseSlots ? 'right-first' : 'left-first'}, images ${reverseImages ? 'reversed' : 'normal'}`, () => {
-        let state = storage.createInitialState();
+        let state = stateBeforeGroup(group);
+        const previousProgress = state.progress;
         const slots = [...group.slots];
         const images = group.options.filter(option => option.isCorrect);
         if (reverseSlots) slots.reverse();
         if (reverseImages) images.reverse();
         state = select(state, slots[0], images[0].id);
-        assert.equal(state.progress, 1);
-        assert.equal(state.slots.central.completed, false);
+        assert.equal(state.progress, previousProgress + 1);
+        assert.equal(state.slots.central.completed, true);
         assert.equal(state.modal, null);
         assert.equal(rules.openSlot(state, slots[0]), state);
         assert.equal(rules.getAvailableOptions(state, slots[0]).length, 0);
@@ -87,9 +126,10 @@ for (const group of data.branches) {
         assert.equal(rules.chooseImage(open, images[0].id).changed, false);
         assert.equal(rules.chooseImage(open, 'ttd').changed, false);
         state = rules.chooseImage(open, images[1].id).state;
-        assert.equal(state.progress, 2);
+        assert.equal(state.progress, previousProgress + 2);
         assert.ok(storage.validateState(state));
-        for (const other of data.branches.filter(branch => branch !== group)) assert.equal(rules.getAvailableOptions(state, other.slots[0]).length, 3);
+        const next = data.groups[data.groups.indexOf(group) + 1];
+        if (next) assert.equal(rules.getAvailableOptions(state, next.slots[0]).length, 3);
       });
     }
   }
@@ -107,7 +147,7 @@ test('completion happens on the seventh selection and can be dismissed without r
   assert.equal(rules.chooseImage(state, 'ttd').changed, false);
 });
 test('invalid slot and image IDs cannot mutate state', () => {
-  const state = storage.createInitialState();
+  const state = readyState();
   assert.equal(rules.openSlot(state, 'unknown'), state);
   assert.equal(rules.openSlot(state, '__proto__'), state);
   assert.equal(rules.chooseImage(state, 'ttd').state, state);
@@ -117,7 +157,7 @@ test('invalid slot and image IDs cannot mutate state', () => {
 test('persistence restores selections, filtered options and the active modal', () => {
   const memory = new Map();
   const store = storage.createStore(() => ({ getItem: key => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, value) }));
-  let state = select(storage.createInitialState(), 'emotion-2', 'tcct2d');
+  let state = select(stateBeforeGroup(data.branches[2]), 'emotion-2', 'tcct2d');
   state = rules.openSlot(state, 'emotion-1');
   assert.ok(store.save(state));
   const restored = store.load();
@@ -128,6 +168,51 @@ test('persistence restores selections, filtered options and the active modal', (
   const reset = store.reset();
   assert.equal(reset.saved, true);
   assert.equal(store.load().state.progress, 0);
+  assert.equal(store.load().state.introStep, 0);
+});
+
+test('question reveals survive reload and reset returns to the title question', () => {
+  let raw;
+  const store = storage.createStore(() => ({ getItem: () => raw ?? null, setItem: (key, value) => { raw = value; } }));
+  for (const state of [storage.createInitialState(), rules.revealPoemTitle(storage.createInitialState()), readyState()]) {
+    assert.ok(store.save(state));
+    assert.equal(store.load().state.introStep, state.introStep);
+  }
+  assert.equal(store.reset().state.introStep, 0);
+});
+
+test('legacy progress keeps existing pictures and locks a later branch until earlier groups are filled', () => {
+  const old = clone(storage.createInitialState());
+  delete old.introStep;
+  old.slots['emotion-2'] = { imageId: 'tcct2d', completed: true };
+  old.progress = 1;
+  old.modal = 'selection'; old.activeSlot = 'emotion-1';
+  const store = storage.createStore(() => ({ getItem: () => JSON.stringify(old) }));
+  const migrated = store.load().state;
+  assert.equal(migrated.progress, 1);
+  assert.equal(migrated.slots['emotion-2'].imageId, 'tcct2d');
+  assert.equal(migrated.introStep, 2);
+  assert.equal(migrated.modal, null);
+  assert.equal(rules.openSlot(migrated, 'emotion-1'), migrated);
+  assert.equal(rules.openSlot(migrated, 'central').activeSlot, 'central');
+  assert.ok(storage.validateState(migrated));
+});
+
+test('legacy empty and completed games migrate without losing completion or skipping the new questions', () => {
+  for (const state of [storage.createInitialState(), rules.closeModal(completedState())]) {
+    const old = clone(state); delete old.introStep;
+    const migrated = storage.createStore(() => ({ getItem: () => JSON.stringify(old) })).load().state;
+    assert.equal(migrated.progress, state.progress);
+    assert.equal(migrated.introStep, state.completed ? 2 : 0);
+    assert.equal(migrated.modal, null);
+  }
+});
+
+test('a forged selection for a locked group cannot award a picture or persist', () => {
+  const state = { ...readyState(), modal: 'selection', activeSlot: 'emotion-1' };
+  assert.equal(rules.chooseImage(state, 'tcct1d').changed, false);
+  assert.equal(storage.validateState(state), false);
+  assert.equal(storage.createStore().save(state), false);
 });
 test('a dismissed completion remains dismissed after storage restore', () => {
   let raw;
@@ -138,6 +223,9 @@ test('a dismissed completion remains dismissed after storage restore', () => {
 });
 const mutations = {
   'unsupported version': state => { state.version = 2; },
+  'invalid intro step': state => { state.introStep = 3; },
+  'non-numeric intro step': state => { state.introStep = '2'; },
+  'progress before revealing author': state => { state.slots.central = { imageId: 'ttd', completed: true }; state.progress = 1; state.introStep = 1; },
   'missing content version from the placeholder set': state => { delete state.contentVersion; },
   'outdated content version': state => { state.contentVersion = 1; },
   'missing slot': state => { delete state.slots['emotion-1']; },
@@ -166,7 +254,7 @@ for (const [name, mutate] of Object.entries(mutations)) {
   });
 }
 test('an active modal pointing to a completed slot is rejected', () => {
-  const state = select(storage.createInitialState(), 'central', 'ttd');
+  const state = select(readyState(), 'central', 'ttd');
   state.activeSlot = 'central'; state.modal = 'selection';
   assert.equal(storage.validateState(state), false);
 });

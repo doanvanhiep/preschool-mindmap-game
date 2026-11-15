@@ -3,6 +3,7 @@
   const image = (group, id, description, isCorrect, extension = 'jpg', revision = '') => ({ id, src: `assets/images/${group}/${id}.${extension}${revision ? `?v=${revision}` : ''}`, description, isCorrect });
   const data = {
     title: 'Cô giáo của con',
+    poem: { titleQuestion: 'Bài thơ có tên là gì?', authorQuestion: 'Tác giả là ai?', author: 'Hà Quang' },
     contentVersion: 2,
     central: {
       id: 'central', title: 'Cô giáo của con', question: 'Con hãy chọn bức ảnh cô giáo của mình nhé!',
@@ -17,5 +18,7 @@
   };
   const groups = [data.central, ...data.branches];
   const groupForSlot = slotId => groups.find(group => group.slots.includes(slotId));
-  global.MindMapData = Object.freeze({ ...data, groups, groupForSlot, slotIds: groups.flatMap(group => group.slots) });
+  const activeGroup = state => state.introStep === 2 ? groups.find(group => group.slots.some(id => !state.slots?.[id]?.completed)) : undefined;
+  const isSlotAvailable = (state, slotId) => activeGroup(state)?.slots.includes(slotId) === true && !state.slots[slotId].completed;
+  global.MindMapData = Object.freeze({ ...data, groups, groupForSlot, activeGroup, isSlotAvailable, slotIds: groups.flatMap(group => group.slots) });
 })(globalThis);

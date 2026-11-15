@@ -2,14 +2,16 @@
   'use strict';
   const data = global.MindMapData;
   const storage = global.MindMapStorage;
+  const revealPoemTitle = state => state.introStep === 0 ? { ...state, introStep: 1 } : state;
+  const revealAuthor = state => state.introStep === 1 ? { ...state, introStep: 2 } : state;
   function getAvailableOptions(state, slotId) {
     const group = data.groupForSlot(slotId);
-    if (!group || state.slots[slotId].completed) return [];
+    if (!group || !data.isSlotAvailable(state, slotId)) return [];
     const used = new Set(group.slots.map(id => state.slots[id].imageId));
     return group.options.filter(option => !used.has(option.id));
   }
   function openSlot(state, slotId) {
-    if (!data.slotIds.includes(slotId) || state.slots[slotId].completed) return state;
+    if (!data.slotIds.includes(slotId) || !data.isSlotAvailable(state, slotId)) return state;
     return { ...state, activeSlot: slotId, modal: 'selection' };
   }
   function closeModal(state) { return { ...state, activeSlot: null, modal: null }; }
@@ -20,7 +22,7 @@
     const progress = state.progress + 1;
     return { state: { ...state, slots: { ...state.slots, [state.activeSlot]: { imageId, completed: true } }, progress, completed: progress === data.slotIds.length, activeSlot: null, modal: progress === data.slotIds.length ? 'completion' : null }, correct: true, changed: true };
   }
-  global.MindMapRules = Object.freeze({ getAvailableOptions, openSlot, closeModal, chooseImage });
+  global.MindMapRules = Object.freeze({ revealPoemTitle, revealAuthor, getAvailableOptions, openSlot, closeModal, chooseImage });
   if (typeof document === 'undefined') return;
 
   const $ = id => document.getElementById(id);
@@ -163,7 +165,7 @@
     button.className = `image-slot${slot.completed ? ' is-complete' : ''}`;
     button.dataset.slot = slotId;
     const slotNumber = group.slots.indexOf(slotId) + 1;
-    button.disabled = slot.completed;
+    button.disabled = busy || !data.isSlotAvailable(state, slotId);
     if (slot.completed) {
       const option = group.options.find(item => item.id === slot.imageId);
       const img = document.createElement('img');
@@ -179,7 +181,25 @@
     }
     return button;
   }
+  function updateAvailability() {
+    document.querySelectorAll('[data-slot]').forEach(button => {
+      const available = data.isSlotAvailable(state, button.dataset.slot);
+      button.disabled = busy || !available;
+      button.classList.toggle('is-current', available && !busy);
+      button.classList.toggle('is-locked', !available && !state.slots[button.dataset.slot].completed);
+    });
+  }
+  function renderIntro() {
+    $('poem-title-button').textContent = state.introStep === 0 ? data.poem.titleQuestion : data.title;
+    $('poem-title-button').disabled = state.introStep > 0;
+    $('poem-author').hidden = state.introStep === 0;
+    $('poem-author-button').textContent = state.introStep < 2 ? data.poem.authorQuestion : data.poem.author;
+    $('poem-author-button').disabled = state.introStep === 2;
+    const group = data.activeGroup(state);
+    $('play-hint').textContent = state.introStep === 0 ? 'Chạm vào câu hỏi để khám phá bài thơ' : state.introStep === 1 ? 'Chạm vào câu hỏi để biết tên tác giả' : group ? `Chọn tranh cho ${group.id === 'central' ? 'ô trung tâm' : group.title.toLocaleLowerCase('vi')}` : 'Con đã hoàn thành sơ đồ!';
+  }
   function renderBoard() {
+    renderIntro();
     $('central-slot').replaceChildren(createSlot('central'));
     $('branches').replaceChildren(...data.branches.map(branch => {
       const section = document.createElement('section'); section.className = `branch branch-${branch.id}`; section.dataset.branch = branch.id;
@@ -195,6 +215,7 @@
     $('progress-text').append(strong);
     $('progress-text').setAttribute('aria-label', `Đã hoàn thành ${state.progress} trên 7 bức tranh`);
     $('progress-dots').replaceChildren(...data.slotIds.map((id, index) => { const dot = document.createElement('span'); dot.className = index < state.progress ? 'filled' : ''; return dot; }));
+    updateAvailability();
     requestAnimationFrame(drawConnections);
   }
   function drawConnections() {
@@ -270,6 +291,20 @@
     if (target && !target.disabled) target.focus();
     returnFocus = null;
   }
+  $('poem-title-button').addEventListener('click', () => {
+    const next = revealPoemTitle(state);
+    if (next === state) return;
+    state = next; persist(); renderBoard();
+    $('game-status').textContent = `Bài thơ ${data.title}. ${data.poem.authorQuestion}`;
+    $('poem-author-button').focus({ preventScroll: true });
+  });
+  $('poem-author-button').addEventListener('click', () => {
+    const next = revealAuthor(state);
+    if (next === state) return;
+    state = next; persist(); renderBoard();
+    $('game-status').textContent = `Tác giả ${data.poem.author}. Con hãy chọn tranh cho ô trung tâm.`;
+    document.querySelector('[data-slot="central"]').focus({ preventScroll: true });
+  });
   $('mindmap').addEventListener('click', event => {
     const button = event.target.closest('[data-slot]');
     if (!button || busy) return;
@@ -281,6 +316,7 @@
     const button = event.target.closest('[data-image]');
     if (!button || busy || state.modal !== 'selection') return;
     busy = true;
+    let nextFocus = null;
     try {
       const result = chooseImage(state, button.dataset.image);
       if (!result.changed) {
@@ -309,15 +345,15 @@
         showDialog('completion');
       }
       if (!state.completed) {
-        const group = data.groupForSlot(previousSlot);
-        const nextId = [...group.slots, ...data.slotIds].find(id => !state.slots[id].completed);
-        if (nextId) document.querySelector(`[data-slot="${nextId}"]`).focus({ preventScroll: event.detail !== 0 });
+        nextFocus = data.slotIds.find(id => data.isSlotAvailable(state, id));
       }
       returnFocus = state.completed ? '#reset-button' : null;
     } finally {
       busy = false;
       $('mindmap').removeAttribute('aria-busy');
       $('reset-button').disabled = false;
+      updateAvailability();
+      if (nextFocus) document.querySelector(`[data-slot="${nextFocus}"]`).focus({ preventScroll: event.detail !== 0 });
     }
   });
   $('reset-button').addEventListener('click', () => { if (busy) return; returnFocus = '#reset-button'; showDialog('reset'); });
@@ -326,7 +362,7 @@
     state = storage.createInitialState(); stopSounds();
     effectLayer.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
     effectLayer.replaceChildren();
-    persist(); renderBoard(); showDialog(null); returnFocus = null; $('reset-button').focus();
+    persist(); renderBoard(); showDialog(null); returnFocus = null; $('poem-title-button').focus();
     $('game-status').textContent = 'Trò chơi đã bắt đầu lại. Bé cùng chọn tranh nhé!';
   });
   $('view-map').addEventListener('click', () => dismissDialog('completion'));
