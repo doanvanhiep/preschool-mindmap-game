@@ -21,7 +21,7 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 ## Cách chơi
 
 - Ban đầu chỉ có hình bàn tay trong nút tròn. Chạm hình để hiện “Bài thơ có tên là gì?”, chạm câu hỏi để hiện “Cô giáo của con”. Bên dưới xuất hiện bàn tay thứ hai; chạm để hiện “Tác giả là ai?”, chạm câu hỏi để hiện “Hà Quang”. Sau đó ô trung tâm bắt đầu nhấp nháy và có thể chọn tranh. Không có chữ gợi ý nhỏ trước hai câu hỏi.
-- Mỗi lần hiện đáp án tên bài thơ hoặc tác giả sẽ có tiếng vỗ tay chúc mừng ngắn. Chạm hình bàn tay hay hiện câu hỏi không phát âm thanh. Cụm sao và số đếm tiến độ được bỏ khỏi giao diện; tiến độ vẫn lưu để mở đúng nhóm và nhận biết hoàn thành.
+- Các bước hiện hình bàn tay, câu hỏi và đáp án tên bài thơ/tác giả đều không phát âm thanh. Cụm sao và số đếm tiến độ được bỏ khỏi giao diện; tiến độ vẫn lưu để mở đúng nhóm và nhận biết hoàn thành.
 - Chơi theo thứ tự: trung tâm → Hoạt động của cô → Thái độ của cô → Tình cảm của bé. Điền đủ tranh của nhóm hiện tại mới mở nhóm tiếp theo; các ô đang được chọn có viền nhấp nháy nhẹ, các ô chưa tới lượt bị khóa. Trong cùng một nhánh vẫn có thể chọn hai ô theo bất kỳ thứ tự nào.
 - Ô trung tâm có 3 tranh, một tranh đúng.
 - Mỗi nhánh có 3 tranh, hai tranh đúng. Ô nào được điền trước cũng có 3 lựa chọn; ô còn lại có 2 lựa chọn. Tranh đúng đã dùng không được chọn lại.
@@ -51,7 +51,6 @@ assets/images/flower.svg
 assets/sounds/correct.mp3
 assets/sounds/wrong.mp3
 assets/sounds/complete.mp3
-assets/sounds/applause.mp3
 tests/game.test.cjs
 scripts/generate-assets.py
 .nojekyll
@@ -70,7 +69,7 @@ Giữ ID ảnh duy nhất, ID ô ổn định, 3 lựa chọn/nhóm, một đáp
 | Thái độ của cô | `tdcc1d.jpg`, `tdcc2d.jpg` | `tdccs.jpg` |
 | Tình cảm của bé | `tcct1d.jpg`, `tcct2d.jpg` | `tccts.jpg` |
 
-Bộ ảnh JPG/PNG hiện tại do người dùng cung cấp, được sao chép nguyên vẹn vào dự án. Hậu tố d là đáp án đúng, s là đáp án sai. Nhóm tình cảm sử dụng tcct1d.jpg, tcct2d.jpg và tccts.jpg (tương ứng nhóm tccb trong yêu cầu). Bốn âm báo được tạo riêng cho dự án, không cần dịch vụ bên ngoài. Script sau chỉ tạo lại các SVG mẫu cũ, không thay thế bộ ảnh JPG/PNG hiện tại. Để tạo lại SVG mẫu, chạy `python scripts/generate-assets.py`. Để tạo lại MP3, cài **công cụ tác giả tùy chọn** `lameenc` trong môi trường Python riêng rồi chạy `python scripts/generate-assets.py --audio`. Người chơi và website không cần Python hoặc thư viện này.
+Bộ ảnh JPG/PNG hiện tại do người dùng cung cấp, được sao chép nguyên vẹn vào dự án. Hậu tố d là đáp án đúng, s là đáp án sai. Nhóm tình cảm sử dụng tcct1d.jpg, tcct2d.jpg và tccts.jpg (tương ứng nhóm tccb trong yêu cầu). Ba âm báo được tạo riêng cho dự án, không cần dịch vụ bên ngoài. Script sau chỉ tạo lại các SVG mẫu cũ, không thay thế bộ ảnh JPG/PNG hiện tại. Để tạo lại SVG mẫu, chạy `python scripts/generate-assets.py`. Để tạo lại MP3, cài **công cụ tác giả tùy chọn** `lameenc` trong môi trường Python riêng rồi chạy `python scripts/generate-assets.py --audio`. Người chơi và website không cần Python hoặc thư viện này.
 
 Bộ tranh hiện tại có contentVersion = 2; tiến độ của bộ tranh cũ sẽ bắt đầu lại để tránh hiển thị nhầm đáp án. Nếu thay đổi ý nghĩa hoặc ID dữ liệu, tăng contentVersion trong js/game-data.js hoặc tăng phiên bản trạng thái và khóa lưu trong `js/storage.js`, hoặc xóa khóa cũ trên trình duyệt thử nghiệm. Dữ liệu không hợp lệ sẽ được bỏ qua an toàn.
 
@@ -93,7 +92,7 @@ Kiểm tra thực tế trên trình duyệt: âm thanh đúng/sai/hoàn thành, 
 
 - 59/59 kiểm thử Node đạt; ba tệp JavaScript qua kiểm tra cú pháp.
 - Chrome: hình bàn tay 80 px hiện trước mỗi câu hỏi, không có chữ gợi ý nhỏ. Bấm liên tiếp không bỏ qua câu hỏi, Enter/Space hoạt động và giữ phím bị chặn. Reload tại cả năm trạng thái giữ đúng hình/câu hỏi/đáp án. Ô trung tâm chỉ mở và nhấp nháy sau khi hiện tác giả.
-- Cụm sao/số đếm đã bỏ; tiến độ nội bộ vẫn lưu và mở nhóm đúng thứ tự. MP3 vỗ tay giải mã được, dài khoảng 1,8 giây và phát một lần cho mỗi đáp án tên bài thơ/tác giả; hiện câu hỏi và reload không phát âm thanh.
+- Cụm sao/số đếm đã bỏ; tiến độ nội bộ vẫn lưu và mở nhóm đúng thứ tự. Đã bỏ âm thanh vỗ tay; toàn bộ phần mở đầu và reload đều không phát âm thanh.
 - Chơi đủ 7 ô theo thứ tự, thử chọn phải trước, chọn lặp khi ảnh bay, reload hộp chọn ảnh, đóng lời chúc mừng và chơi lại đều đạt. Tiến độ từ bản cũ giữ cả ảnh đã điền và hộp chọn ảnh đang mở.
 - Không tràn ngang ở 360, 768 và 1280 px. Chế độ giảm chuyển động thay nhấp nháy bằng viền sáng tĩnh. Không có lỗi console trong luồng hoàn thành.
 - Tiến độ cũ được giữ lại, với nhóm đầu tiên chưa đủ ảnh được mở tiếp. Tiêu đề ngoài “Hoạt động của cô” và tiêu đề trong “Cô vui vẻ tươi cười khi vào lớp” giữ nguyên.
