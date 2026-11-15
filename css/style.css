@@ -34,11 +34,6 @@ h1 em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color:
 .poem-title.is-hint, .poem-author button.is-hint { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; padding: 0; border: 1px solid #cddbb9; border-radius: 50%; background: #eef3df; text-decoration: none; box-shadow: 0 0 0 5px #d8e3be55; animation: hint-glow 1.8s ease-in-out infinite; }
 .is-hint img { width: 48px; height: 48px; }
 .poem-title.is-hint:hover, .poem-author button.is-hint:hover { background: #e4edce; }
-.progress-pill { display: inline-flex; align-items: center; gap: 12px; padding: 8px 15px; margin-top: 12px; border: 1px solid #e3e4d5; background: #f2f1e5; border-radius: 30px; font-size: 16px; }
-.progress-star { color: #c89e43; font-size: 21px; }
-.progress-dots { display: flex; gap: 5px; }
-.progress-dots span { width: 7px; height: 7px; background: #dcded0; border-radius: 50%; transition: background .2s; }
-.progress-dots .filled { background: #7a9b64; }
 .mindmap {
   position: relative; isolation: isolate; min-height: 640px; max-width: 1260px;
   margin: 4px auto 0; padding: 28px 12px 36px;
@@ -140,7 +135,6 @@ h1 em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color:
   main { padding: 0 16px; }
   .intro { padding: 22px 0 16px; }
   h1 { font-size: 39px; letter-spacing: -1.8px; }
-  .progress-pill { padding: 7px 13px; font-size: 15px; margin-top: 10px; }
   .mindmap { display: flex; flex-direction: column; gap: 36px; padding: 8px 0 20px 26px; min-height: 0; max-width: 440px; border-radius: 25px; }
   .central-node { width: 220px; }
   .central-node .image-slot { height: 265px; }

@@ -125,7 +125,30 @@ def generate_audio():
             samples.extend([0.0] * int(.09 * sample_rate))
         return samples
 
-    tracks = {'correct': firework(1.8, [0, .45, .9]), 'wrong': sad_notes(), 'complete': firework(1.8, [0, .3, .65, .95])}
+    def applause():
+        # Several hands clap at different rhythms, with a little room reflection.
+        clap_rng = random.Random(27111)
+        samples = [0.0] * int(1.8 * sample_rate)
+        for person in range(7):
+            start = .015 + person * .022
+            while start < 1.48:
+                fast = slow = 0.0
+                strength = clap_rng.uniform(.65, 1)
+                for i in range(int(.1 * sample_rate)):
+                    t = i / sample_rate
+                    noise = clap_rng.uniform(-1, 1)
+                    fast = .45 * fast + .55 * noise
+                    slow = .94 * slow + .06 * noise
+                    envelope = (1 - math.exp(-1400 * t)) * math.exp(-55 * t)
+                    value = .3 * strength * envelope * (fast - slow)
+                    for delay, reflection in [(0, 1), (.023, .25), (.047, .12)]:
+                        index = int((start + delay) * sample_rate) + i
+                        if index < len(samples):
+                            samples[index] += value * reflection
+                start += clap_rng.uniform(.23, .36)
+        return samples
+
+    tracks = {'correct': firework(1.8, [0, .45, .9]), 'wrong': sad_notes(), 'complete': firework(1.8, [0, .3, .65, .95]), 'applause': applause()}
     for name, samples in tracks.items():
         pcm = bytearray()
         gain = min(2.4, .5 / max(max(abs(sample) for sample in samples), .001))
@@ -137,7 +160,7 @@ def generate_audio():
         encoder.set_channels(1)
         encoder.set_quality(2)
         (target / f'{name}.mp3').write_bytes(encoder.encode(bytes(pcm)) + encoder.flush())
-    print('Created firework celebration and gentle sad MP3 sound effects.')
+    print('Created firework, gentle sad and applause MP3 sound effects.')
 
 
 if __name__ == '__main__':

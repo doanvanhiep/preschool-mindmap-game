@@ -40,9 +40,9 @@
   effectLayer.setAttribute('aria-hidden', 'true');
   document.body.append(effectLayer);
   const dialogs = { selection: $('selection-dialog'), completion: $('completion-dialog'), reset: $('reset-dialog') };
-  const sounds = Object.fromEntries(['correct', 'wrong', 'complete'].map(name => {
-    const audio = new Audio(`assets/sounds/${name}.mp3?v=fireworks-short-1`);
-    audio.volume = name === 'wrong' ? 0.2 : 0.28;
+  const sounds = Object.fromEntries(['correct', 'wrong', 'complete', 'applause'].map(name => {
+    const audio = new Audio(`assets/sounds/${name}.mp3?v=applause-1`);
+    audio.volume = name === 'wrong' ? 0.2 : name === 'applause' ? 0.24 : 0.28;
     audio.preload = 'auto';
     return [name, audio];
   }));
@@ -225,11 +225,6 @@
       const slots = document.createElement('div'); slots.className = 'branch-slots'; slots.append(...branch.slots.map(createSlot));
       section.append(heading, slots); return section;
     }));
-    $('progress-text').replaceChildren();
-    const strong = document.createElement('strong'); strong.textContent = `${state.progress}/7`;
-    $('progress-text').append(strong);
-    $('progress-text').setAttribute('aria-label', `Đã hoàn thành ${state.progress} trên 7 bức tranh`);
-    $('progress-dots').replaceChildren(...data.slotIds.map((id, index) => { const dot = document.createElement('span'); dot.className = index < state.progress ? 'filled' : ''; return dot; }));
     updateAvailability();
     requestAnimationFrame(drawConnections);
   }
@@ -319,9 +314,11 @@
     if (!questionVisible) {
       $('game-status').textContent = title ? data.poem.titleQuestion : data.poem.authorQuestion;
     } else if (title) {
+      playSound('applause');
       $('game-status').textContent = `Bài thơ ${data.title}.`;
       $('poem-author-button').focus({ preventScroll: true });
     } else {
+      playSound('applause');
       $('game-status').textContent = `Tác giả ${data.poem.author}. Con hãy chọn tranh cho ô trung tâm.`;
       document.querySelector('[data-slot="central"]').focus({ preventScroll: true });
     }
