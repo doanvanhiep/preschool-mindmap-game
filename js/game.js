@@ -320,6 +320,10 @@
       $('game-status').textContent = `Tác giả ${data.poem.author}. Con hãy chọn tranh cho ô trung tâm.`;
       document.querySelector('[data-slot="central"]').focus({ preventScroll: true });
     }
+    if (questionVisible) {
+      celebrate($(`poem-${kind}-button`), false);
+      playSound('correct');
+    }
   }
   for (const kind of ['title', 'author']) {
     const button = $(`poem-${kind}-button`);

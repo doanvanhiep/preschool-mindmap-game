@@ -21,7 +21,7 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 ## Cách chơi
 
 - Ban đầu chỉ có hình bàn tay trong nút tròn. Chạm hình để hiện “Bài thơ có tên là gì?”, chạm câu hỏi để hiện “Cô giáo của con”. Bên dưới xuất hiện bàn tay thứ hai; chạm để hiện “Tác giả là ai?”, chạm câu hỏi để hiện “Hà Quang”. Sau đó ô trung tâm bắt đầu nhấp nháy và có thể chọn tranh. Không có chữ gợi ý nhỏ trước hai câu hỏi.
-- Các bước hiện hình bàn tay, câu hỏi và đáp án tên bài thơ/tác giả đều không phát âm thanh. Cụm sao và số đếm tiến độ được bỏ khỏi giao diện; tiến độ vẫn lưu để mở đúng nhóm và nhận biết hoàn thành.
+- Khi hiện đáp án tên bài thơ hoặc tác giả, pháo hoa toàn màn hình và âm thanh pháo hoa nhẹ khoảng 1,8 giây bắt đầu cùng lúc. Hiện hình bàn tay hoặc câu hỏi không phát âm thanh; reload không phát lại phần ăn mừng. Cụm sao và số đếm tiến độ được bỏ khỏi giao diện; tiến độ vẫn lưu để mở đúng nhóm và nhận biết hoàn thành.
 - Chơi theo thứ tự: trung tâm → Hoạt động của cô → Thái độ của cô → Tình cảm của bé. Điền đủ tranh của nhóm hiện tại mới mở nhóm tiếp theo; các ô đang được chọn có viền nhấp nháy nhẹ, các ô chưa tới lượt bị khóa. Trong cùng một nhánh vẫn có thể chọn hai ô theo bất kỳ thứ tự nào.
 - Ô trung tâm có 3 tranh, một tranh đúng.
 - Mỗi nhánh có 3 tranh, hai tranh đúng. Ô nào được điền trước cũng có 3 lựa chọn; ô còn lại có 2 lựa chọn. Tranh đúng đã dùng không được chọn lại.
@@ -92,7 +92,7 @@ Kiểm tra thực tế trên trình duyệt: âm thanh đúng/sai/hoàn thành, 
 
 - 59/59 kiểm thử Node đạt; ba tệp JavaScript qua kiểm tra cú pháp.
 - Chrome: hình bàn tay 80 px hiện trước mỗi câu hỏi, không có chữ gợi ý nhỏ. Bấm liên tiếp không bỏ qua câu hỏi, Enter/Space hoạt động và giữ phím bị chặn. Reload tại cả năm trạng thái giữ đúng hình/câu hỏi/đáp án. Ô trung tâm chỉ mở và nhấp nháy sau khi hiện tác giả.
-- Cụm sao/số đếm đã bỏ; tiến độ nội bộ vẫn lưu và mở nhóm đúng thứ tự. Đã bỏ âm thanh vỗ tay; toàn bộ phần mở đầu và reload đều không phát âm thanh.
+- Cụm sao/số đếm đã bỏ; tiến độ nội bộ vẫn lưu và mở nhóm đúng thứ tự. Không dùng âm thanh vỗ tay; hai đáp án mở đầu dùng hiệu ứng và âm thanh pháo hoa, reload không tự phát lại.
 - Chơi đủ 7 ô theo thứ tự, thử chọn phải trước, chọn lặp khi ảnh bay, reload hộp chọn ảnh, đóng lời chúc mừng và chơi lại đều đạt. Tiến độ từ bản cũ giữ cả ảnh đã điền và hộp chọn ảnh đang mở.
 - Không tràn ngang ở 360, 768 và 1280 px. Chế độ giảm chuyển động thay nhấp nháy bằng viền sáng tĩnh. Không có lỗi console trong luồng hoàn thành.
 - Tiến độ cũ được giữ lại, với nhóm đầu tiên chưa đủ ảnh được mở tiếp. Tiêu đề ngoài “Hoạt động của cô” và tiêu đề trong “Cô vui vẻ tươi cười khi vào lớp” giữ nguyên.
