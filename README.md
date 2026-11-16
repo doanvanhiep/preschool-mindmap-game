@@ -26,8 +26,8 @@ Tiến độ lưu trên chính trình duyệt và địa chỉ đang dùng, vớ
 - Ô trung tâm có 3 tranh, một tranh đúng.
 - Mỗi nhánh có 3 tranh, hai tranh đúng. Ô nào được điền trước cũng có 3 lựa chọn; ô còn lại có 2 lựa chọn. Tranh đúng đã dùng không được chọn lại.
 - Từ trung tâm nối đến 3 nhánh; mỗi nhánh tách thành 2 mũi tên hướng vào 2 ô tranh, tổng cộng 6 đầu mũi tên.
-- Hai ô của mỗi nhánh có khung riêng, cách nhau; desktop xếp lệch vị trí, điện thoại xếp ngang hàng để dành thêm chiều cao cho ảnh. Không còn nền bao chung hai ô. Sơ đồ chỉ giữ tiêu đề chính và hướng dẫn cần thiết.
-- Bố cục tận dụng chiều rộng và chiều cao màn hình để phóng to các ô, giảm khoảng trống dưới tên bài thơ và tác giả. Tablet xếp thành hai cột, điện thoại vẫn xếp sơ đồ dọc. Toàn bộ 7 ô nằm trong một khung nhìn: ở 1366 × 768 px, ô nhánh khoảng 212 × 184 px và ô trung tâm 340 × 405 px; ở điện thoại 360 × 640 px, ô nhánh khoảng 151 × 77 px. Ảnh hiển thị đầy đủ, không cắt nội dung.
+- Hai ô của mỗi nhánh có khung riêng, cách nhau và lệch vị trí; không còn nền bao chung hai ô. Sơ đồ chỉ giữ tiêu đề chính và hướng dẫn cần thiết.
+- Bố cục co theo chiều cao màn hình, giảm khoảng trống dưới tên bài thơ và tác giả. Toàn bộ 7 ô nằm trong một khung nhìn ở desktop, tablet và điện thoại 360 × 640 px; điện thoại vẫn xếp sơ đồ dọc với các ô chạm tối thiểu 44 px.
 - Chọn sai không mất tiến độ hoặc loại đáp án. Chọn đúng sẽ điền tranh và khóa ô.
 - Khi chọn đúng, ảnh bay từ bảng chọn vào ô trong khoảng 1,35 giây, hiện dần khi tới nơi rồi có pháo hoa ở nhiều vùng trên toàn màn hình. Chọn sai phát giai điệu buồn nhẹ.
 - Âm thanh đúng/hoàn thành chỉ có tiếng pháo hoa nhẹ và tiếng lách tách trong khoảng 1,8 giây, bắt đầu khi ảnh tới ô và pháo hoa xuất hiện, không có tiếng rít mở đầu. Âm thanh sai dài khoảng 2,1 giây. Hiệu ứng mới thay thế hiệu ứng cũ nếu bé tiếp tục chọn đúng, tránh chồng nhiều màn pháo hoa.
