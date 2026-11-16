@@ -61,7 +61,7 @@ scripts/generate-assets.py
 
 Sửa cấu hình trong `js/game-data.js`. Mỗi ảnh có `id`, `src`, `description`, `isCorrect`. Mỗi nhóm có `id`, `title`, `question`, `slots`, `options`; ba nhánh có thêm thông tin trình bày. Nội dung cấu hình được đưa lên giao diện bằng `textContent`.
 
-Giữ ID ảnh duy nhất, ID ô ổn định, 3 lựa chọn/nhóm, một đáp án đúng ở trung tâm và hai đáp án đúng ở mỗi nhánh. Dùng đường dẫn tương đối, chẳng hạn `assets/images/emotion/tcct1d.jpg`, không dùng `/assets/...`. Ảnh dọc và ngang đều hiển thị đầy đủ bằng `object-fit: contain`.
+Giữ ID ảnh duy nhất, ID ô ổn định, 3 lựa chọn/nhóm, một đáp án đúng ở trung tâm và hai đáp án đúng ở mỗi nhánh. Dùng đường dẫn tương đối, chẳng hạn `assets/images/emotion/tcct1d.jpg`, không dùng `/assets/...`. Ảnh đã điền dùng `object-fit: fill`, co giãn theo ô để phủ kín khung, không có khoảng đệm và không cắt nội dung. Ảnh trong bảng chọn vẫn dùng `object-fit: contain` để giữ tỉ lệ gốc.
 
 | Nhóm | Đáp án đúng | Đáp án sai |
 |---|---|---|

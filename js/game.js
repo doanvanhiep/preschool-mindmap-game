@@ -58,6 +58,7 @@
 
   function fittedImageRect(image, fallback = image) {
     const rect = image.getBoundingClientRect();
+    if (getComputedStyle(image).objectFit === 'fill') return rect;
     const width = image.naturalWidth || fallback.naturalWidth;
     const height = image.naturalHeight || fallback.naturalHeight;
     if (!width || !height) return rect;
