@@ -208,7 +208,7 @@
   function renderIntro() {
     renderIntroButton($('poem-title-button'), state.titleQuestionVisible, state.introStep > 0, data.poem.titleQuestion, data.title, 'Hiện câu hỏi tên bài thơ');
     $('poem-author').hidden = state.introStep === 0;
-    renderIntroButton($('poem-author-button'), state.authorQuestionVisible, state.introStep === 2, data.poem.authorQuestion, data.poem.author, 'Hiện câu hỏi tác giả');
+    renderIntroButton($('poem-author-button'), state.authorQuestionVisible, state.introStep === 2, data.poem.authorQuestion, `Tác giả: ${data.poem.author}`, 'Hiện câu hỏi tác giả');
     const group = data.activeGroup(state);
     $('play-hint').hidden = state.introStep < 2;
     $('play-hint').textContent = state.introStep < 2 ? '' : group ? `Chọn tranh cho ${group.id === 'central' ? 'ô trung tâm' : group.title.toLocaleLowerCase('vi')}` : 'Con đã hoàn thành sơ đồ!';
